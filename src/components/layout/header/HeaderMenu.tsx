@@ -47,13 +47,13 @@ export default function HeaderMenu() {
   return (
     <Menubar className="bg-transparent border-0 text-gray-200 space-x-6">
       <MenubarMenu>
-        <MenubarTrigger className="text-gray-200 hover:text-red-400 transition cursor-pointer">
+        <MenubarTrigger className="text-gray-200 hover:text-red-400 transition cursor-pointer text-lg font-semibold">
           <Link href={`/`}>Trang chủ</Link>
         </MenubarTrigger>
       </MenubarMenu>
 
       <MenubarMenu>
-        <MenubarTrigger className="text-gray-200 hover:text-red-400 transition cursor-pointer">
+        <MenubarTrigger className="text-gray-200 hover:text-red-400 transition cursor-pointer text-lg font-semibold">
           Thể loại
         </MenubarTrigger>
         <MenubarContent className="bg-gray-900 text-gray-200 p-4 rounded-lg w-[500px]">
@@ -73,7 +73,7 @@ export default function HeaderMenu() {
       </MenubarMenu>
 
       <MenubarMenu>
-        <MenubarTrigger className="text-gray-200 hover:text-red-400 transition cursor-pointer">
+        <MenubarTrigger className="text-gray-200 hover:text-red-400 transition cursor-pointer text-lg font-semibold">
           Quốc gia
         </MenubarTrigger>
         <MenubarContent className="bg-gray-900 text-gray-200 p-4 rounded-lg w-[500px]">
@@ -93,7 +93,7 @@ export default function HeaderMenu() {
       </MenubarMenu>
 
       <MenubarMenu>
-        <MenubarTrigger className="text-gray-200 hover:text-red-400 transition cursor-pointer">
+        <MenubarTrigger className="text-gray-200 hover:text-red-400 transition cursor-pointer text-lg font-semibold">
           Phim
         </MenubarTrigger>
         <MenubarContent className="bg-gray-900 text-gray-200 p-4 rounded-lg w-[160px]">

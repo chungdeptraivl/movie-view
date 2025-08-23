@@ -1,10 +1,12 @@
-
-import React from 'react'
+import HeroBannerSlider from "@/components/layout/carousel/HeroBannerSlider";
+import React from "react";
 
 const HomePage = () => {
   return (
-    <main>HomePage</main>
-  )
-}
+    <main>
+      <HeroBannerSlider />
+    </main>
+  );
+};
 
-export default HomePage
+export default HomePage;
