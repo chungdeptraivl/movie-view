@@ -23,12 +23,12 @@ const MovieSection = ({ title, movies, slug }: MovieSectionProps) => {
   return (
     <div className="mb-12">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl sm:text-3xl font-bold text-red-500">{title}</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold text-white">{title}</h2>
         <Link
           href={`/category/${slug}`}
-          className="text-sm sm:text-base text-red-500 hover:underline"
+          className="text-base sm:text-lg text-red-500 hover:underline font-medium"
         >
-          Xem thêm →
+          Xem thêm
         </Link>
       </div>
 
@@ -83,7 +83,7 @@ export default function MovieCategories() {
           key={sec.title}
           title={sec.title}
           movies={sec.movies}
-          slug={sec.slug} 
+          slug={sec.slug}
         />
       ))}
     </div>
