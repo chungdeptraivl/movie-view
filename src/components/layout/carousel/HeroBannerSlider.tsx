@@ -128,15 +128,16 @@ export default function HeroBannerSlider() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 5000);
+    const timer = setTimeout(() => setLoading(false), 100);
     return () => clearTimeout(timer);
   }, []);
 
   if (loading) {
     return (
       <div className="relative w-full aspect-video md:aspect-[21/9] lg:aspect-[16/9] min-h-[400px] sm:min-h-[500px] md:min-h-[600px] bg-black text-white overflow-hidden">
-        <div className="absolute inset-0 bg-gray-800 animate-pulse" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 animate-pulse" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-red-900/20 via-transparent to-transparent" />
       </div>
     );
   }
