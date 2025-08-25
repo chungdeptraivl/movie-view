@@ -143,7 +143,7 @@ export default function HeroBannerSlider() {
   }
 
   return (
-    <div className="relative w-full aspect-video md:aspect-[21/9] lg:aspect-[16/9] min-h-[400px] sm:min-h-[500px] md:min-h-[600px] bg-black text-white overflow-hidden">
+    <div className="relative w-full aspect-video md:aspect-[21/9] lg:aspect-[21/9] min-h-[400px] sm:min-h-[500px] md:min-h-[600px] bg-black text-white overflow-hidden">
       <div className="absolute inset-0 block 2xl:hidden">
         <Swiper
           modules={[Autoplay]}
