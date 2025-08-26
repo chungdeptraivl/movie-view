@@ -17,16 +17,16 @@ export default function MovieDetailPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const router = useRouter()
-    type EpisodeSource = {
-        name: string;
-        filename?: string | null;
-        link_embed?: string | null;
-        link_m3u8?: string | null;
-    }
-    type EpisodeServer = {
-        server_name: string;
-        server_data: EpisodeSource[];
-    }
+    // type EpisodeSource = {
+    //     name: string;
+    //     filename?: string | null;
+    //     link_embed?: string | null;
+    //     link_m3u8?: string | null;
+    // }
+    // type EpisodeServer = {
+    //     server_name: string;
+    //     server_data: EpisodeSource[];
+    // }
     useEffect(() => {
         if (!slug) return
         const controller = new AbortController()

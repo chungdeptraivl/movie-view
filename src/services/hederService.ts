@@ -1,3 +1,4 @@
+import { li } from "framer-motion/client";
 import { apiGet } from "./axiosClient";
 
 export interface Prop {

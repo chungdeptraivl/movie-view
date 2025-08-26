@@ -10,6 +10,8 @@ import {
 import { fetchCategory, fetchCountries, Prop } from "@/services/hederService";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { data } from "framer-motion/client";
+
 const types = ["Phim bộ", "Phim lẻ", "Chiếu rạp"];
 
 export default function HeaderMenu() {
@@ -42,7 +44,7 @@ export default function HeaderMenu() {
         <MenubarTrigger className="text-gray-200 hover:text-red-400 transition cursor-pointer text-lg font-semibold">
           Thể loại
         </MenubarTrigger>
-        <MenubarContent className="bg-gray-900 text-gray-200 p-4 rounded-lg w-[500px]">
+        <MenubarContent className="bg-gray-900 text-gray-200 p-4 rounded-lg w-[600px]">
           <div className="grid grid-cols-4 gap-2">
             {categories.map((cat) => (
               <MenubarItem key={String(cat.id)} asChild>
@@ -62,7 +64,7 @@ export default function HeaderMenu() {
         <MenubarTrigger className="text-gray-200 hover:text-red-400 transition cursor-pointer text-lg font-semibold">
           Quốc gia
         </MenubarTrigger>
-        <MenubarContent className="bg-gray-900 text-gray-200 p-4 rounded-lg w-[500px]">
+        <MenubarContent className="bg-gray-900 text-gray-200 p-4 rounded-lg w-[600px]">
           <div className="grid grid-cols-4 gap-2">
             {countries.map((c) => (
               <MenubarItem key={c.id} asChild>
