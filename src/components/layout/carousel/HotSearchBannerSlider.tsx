@@ -1,17 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation } from "swiper/modules";
 import { motion } from "framer-motion";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Play,
+} from "lucide-react";
 import Link from "next/link";
-import { Play, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import "swiper/css";
 import "swiper/css/navigation";
+import { Autoplay, Navigation } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 type Movie = {
   id: string;
   title: string;
+  duration: string;
   description: string;
   year: string;
   seasons?: string;
@@ -44,6 +51,7 @@ const movies: Movie[] = [
   {
     id: "vikings",
     title: "Vikings",
+    duration: "2h : 30m",
     description:
       "As Ragnar Lodbrok, a Norse farmer, carries out triumphant raids into English territory...",
     year: "2025",
@@ -60,6 +68,7 @@ const movies: Movie[] = [
   {
     id: "toddler",
     title: "Toddler",
+    duration: "1h 30m",
     description:
       "A heartwarming animated story about a young girl and her magical adventures...",
     year: "2025",
@@ -76,6 +85,7 @@ const movies: Movie[] = [
   {
     id: "dark-knight",
     title: "The Dark Knight",
+    duration: "2h 32m",
     description:
       "Batman sets out to dismantle the remaining criminal organizations that plague Gotham...",
     year: "2008",
@@ -92,6 +102,7 @@ const movies: Movie[] = [
   {
     id: "inception",
     title: "Inception",
+    duration: "2h 28m",
     description:
       "A skilled thief who steals corporate secrets through dream-sharing technology...",
     year: "2010",
@@ -108,6 +119,7 @@ const movies: Movie[] = [
   {
     id: "dune",
     title: "Dune: Part Two",
+    duration: "2h 46m",
     description:
       "Paul Atreides unites with Chani and the Fremen while seeking revenge against conspirators...",
     year: "2024",
@@ -123,44 +135,23 @@ const movies: Movie[] = [
   },
 ];
 
-export default function HeroBannerSlider() {
+export default function HotSearchBannerSlider() {
   const [activeMovie, setActiveMovie] = useState<Movie>(movies[0]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="relative w-full aspect-video md:aspect-[21/9] lg:aspect-[16/9] min-h-[400px] sm:min-h-[500px] md:min-h-[600px] bg-black text-white overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 animate-pulse" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-red-900/20 via-transparent to-transparent" />
-      </div>
-    );
-  }
 
   return (
-    <div className="relative w-full aspect-video md:aspect-[21/9] lg:aspect-[21/9] min-h-[400px] sm:min-h-[500px] md:min-h-[600px] bg-black text-white overflow-hidden">
+    <div className="relative w-full aspect-video md:aspect-[21/9] lg:aspect-[16/9] min-h-[400px] sm:min-h-[500px] md:min-h-[600px] bg-black text-white overflow-hidden">
       <div className="absolute inset-0 block 2xl:hidden">
         <Swiper
           modules={[Autoplay]}
           autoplay={{ delay: 5000, disableOnInteraction: false }}
           loop
           onSlideChange={(swiper) => setActiveMovie(movies[swiper.realIndex])}
-          className="h-full"
-          allowTouchMove={true}
-          grabCursor={true}
+          className="w-full h-full"
         >
           {movies.map((movie) => (
             <SwiperSlide key={movie.id}>
               <motion.div
                 className="absolute inset-0 w-full h-full"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8 }}
                 style={{
                   backgroundImage: `url(${movie.backdrop})`,
                   backgroundSize: "cover",
@@ -188,10 +179,46 @@ export default function HeroBannerSlider() {
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-transparent"></div>
-        <div className="absolute inset-0 bg-black/30"></div>
       </motion.div>
 
-      <div className="relative z-10 h-full flex flex-col justify-center px-4 sm:px-8 md:px-12 w-full">
+      <div className="relative z-10 h-full flex items-center gap-10 px-6 lg:px-16">
+        <div className="hidden 2xl:flex w-1/4 h-full flex-col justify-center bg-black/50 p-10">
+          <Swiper
+            slidesPerView={4}
+            spaceBetween={20}
+            direction="vertical"
+            loop
+            modules={[Autoplay]}
+            autoplay={{ delay: 5000, disableOnInteraction: false }}
+            onSlideChange={(swiper) => setActiveMovie(movies[swiper.realIndex])}
+            className="h-fit"
+          >
+            {movies.map((movie) => (
+              <SwiperSlide key={movie.id}>
+                <motion.div
+                  className={`relative cursor-pointer rounded-lg overflow-hidden transition-all ${
+                    activeMovie.id === movie.id
+                      ? "border-2 border-red-500 shadow-lg"
+                      : "opacity-70 hover:opacity-100"
+                  }`}
+                  onClick={() => setActiveMovie(movie)}
+                >
+                  <img
+                    src={movie.backdrop}
+                    alt={movie.title}
+                    className="w-full aspect-[16/9] object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                  <div className="absolute bottom-2 left-3 text-white">
+                    <h4 className="font-semibold">{movie.title}</h4>
+                    <p className="text-xs text-gray-300">{movie.duration}</p>
+                  </div>
+                </motion.div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+
         <motion.div
           key={activeMovie.title}
           variants={containerVariants}
@@ -255,46 +282,6 @@ export default function HeroBannerSlider() {
             </Link>
           </motion.div>
         </motion.div>
-
-        <div className="max-h-fit max-w-[600px] bg-black/70 p-4 sm:p-6 rounded-lg absolute -right-5 hidden 2xl:block">
-          <Swiper
-            slidesPerView={2}
-            spaceBetween={20}
-            loop={true}
-            modules={[Navigation, Autoplay]}
-            autoplay={{ delay: 5000, disableOnInteraction: false }}
-            navigation={{ prevEl: ".custom-prev", nextEl: ".custom-next" }}
-            onSlideChange={(swiper) => setActiveMovie(movies[swiper.realIndex])}
-          >
-            {movies.map((movie) => (
-              <SwiperSlide key={movie.id}>
-                <motion.div
-                  className={`cursor-pointer rounded-xl overflow-hidden shadow-lg border-4 aspect-[0.7] transition ${
-                    activeMovie.id === movie.id
-                      ? "border-red-500 shadow-red-500/40"
-                      : "border-transparent"
-                  }`}
-                  onClick={() => setActiveMovie(movie)}
-                >
-                  <img
-                    src={movie.poster}
-                    alt={movie.title}
-                    className="w-full aspect-[0.7] hover:scale-105 transition-transform"
-                  />
-                </motion.div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-
-          <div className="flex justify-start gap-4 mt-4">
-            <button className="custom-prev p-3 bg-gray-800 hover:bg-gray-700 rounded-full cursor-pointer">
-              <ChevronLeft className="w-5 h-5 text-white" />
-            </button>
-            <button className="custom-next p-3 bg-gray-800 hover:bg-gray-700 rounded-full cursor-pointer">
-              <ChevronRight className="w-5 h-5 text-white" />
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
