@@ -1,3 +1,4 @@
+import { li } from "framer-motion/client";
 import { apiGet } from "./axiosClient";
 
 
@@ -25,15 +26,24 @@ export async function fetchCategory(): Promise<Prop[]> {
 
 export async function fetchCountries(): Promise<Prop[]> {
   try {
-    const res = await apiGet<any>("/quoc-gia");
-    const list = res.data?.data ?? res.data ?? [];
-    return Array.isArray(list)
-      ? list.map((x: any) => ({
-          id: x._id ?? x.id ?? x.slug,
-          name: x.name,
-          slug: x.slug,
-        }))
-      : [];
+    const res = await apiGet<any>("/quoc-gia", {
+      baseKey: "phim_root",
+    });
+
+    const root = res ?? {};
+    const list =
+      root?.data?.items ??
+      root?.data?.data ??
+      root?.items ??
+      root?.data ??
+      root ?? [];
+    if (!Array.isArray(list)) return [];
+
+    return list.map((x: any) => ({
+      id: x._id ?? x.id ?? x.slug ?? "",
+      name: x.name ?? "",
+      slug: x.slug ?? "",
+    }));
   } catch (error) {
     console.error("fetchCountries error:", error);
     return [];

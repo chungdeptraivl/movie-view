@@ -128,5 +128,7 @@ export class MovieDetailService {
     return detail;
   }
 }
+
+
 export const movieDetailService = new MovieDetailService();
 export const movieService = new MovieService();

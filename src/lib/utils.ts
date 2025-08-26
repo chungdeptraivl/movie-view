@@ -1,6 +1,9 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-
+export type Movie = {
+  slug: string;
+  updatedAt: string;
+};
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -63,6 +66,8 @@ export function normalizeTrailer(input?: string | null): string | null {
 }
 
 
+
+
 export function fixApiPath(path: string) {
   const p = `/${path}`.replace(/\/+/g, "/");
   if (p.startsWith("/v1/api/")) return p;
@@ -71,4 +76,24 @@ export function fixApiPath(path: string) {
     return `/v1/api${p}`;
   }
   return p;
+}
+
+
+export async function getAllMovies(): Promise<Movie[]> {
+  const res = await fetch("https://phimapi.com/movies", {
+    next: { revalidate: 3600 }, 
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch movies");
+  }
+
+  const data = await res.json();
+
+
+  return Array.isArray(data)
+    ? data
+    : Array.isArray(data.items)
+    ? data.items
+    : [];
 }

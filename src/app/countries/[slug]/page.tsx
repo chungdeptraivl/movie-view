@@ -81,7 +81,7 @@ export default function MoviesPage() {
         const run = async () => {
             try {
                 setLoading(true);
-                const res = await apiGet<any>(`/the-loai/${slug}?page=${page}&limit=15`, { baseKey: "phim_v1" });
+                const res = await apiGet<any>(`/quoc-gia//${slug}?page=${page}&limit=15`, { baseKey: "phim_v1" });
                 const data = res?.data ?? {};
 
                 setCategoryTitle(data.titlePage || slug);
@@ -111,7 +111,7 @@ export default function MoviesPage() {
 
     return (
         <div className="min-h-screen pb-6 bg-gradient-to-b from-slate-950 via-slate-900 to-black text-white">
-            <Breadcrumb title={slug ? `Thể loại: ${categoryTitle}` : "Movies"} />
+            <Breadcrumb title={slug ? `Quốc gia: ${categoryTitle}` : ""} />
 
             <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
                 {error && <div className="mb-4 text-sm text-red-300">{error}</div>}
