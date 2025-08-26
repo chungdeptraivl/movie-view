@@ -72,7 +72,7 @@ export default function MovieDetailPage() {
             slug: data.slug
         }
     }, [data])
-    
+
     const trailerUrl = useMemo(() => normalizeTrailer(movie?.trailer || ''), [movie?.trailer]);
 
     if (loading) {
@@ -152,7 +152,7 @@ export default function MovieDetailPage() {
                                         <Play className="h-5 w-5" /> Xem trailer
                                     </button>
                                 )}
-                                <Link  href={`/watch/${movie.slug}`} className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/30">
+                                <Link href={`/watch/${movie.slug}`} className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/30">
                                     <Tv className="h-5 w-5" /> Xem ngay
                                 </Link>
                                 <button
@@ -193,13 +193,13 @@ export default function MovieDetailPage() {
                 <div className="mt-6">
                     {activeTab === 'overview' && <Overview overview={movie.overview} stills={movie.stills.slice(0, 6)} />}
                     {activeTab === 'episodes' && data?.episodes && (
-                         <EpisodesPanel
-      slug={String(slug)}
-      servers={data.episodes}
-      onPlay={({ serverIdx, epIdx /*, src*/ }) => {
-        router.push(`/watch/${slug}?server=${serverIdx}&ep=${epIdx}`)
-      }}
-    />
+                        <EpisodesPanel
+                            slug={String(slug)}
+                            servers={data.episodes}
+                            onPlay={({ serverIdx, epIdx}) => {
+                                router.push(`/watch/${slug}?server=${serverIdx}&ep=${epIdx}`)
+                            }}
+                        />
                     )}
                     {activeTab === 'cast' && <CastList cast={movie.cast} />}
                     {activeTab === 'photos' && <PhotoGrid stills={movie.stills} />}
@@ -241,49 +241,131 @@ function EpisodesPanel({
   pageSize = 40,
   onPlay,
 }: {
-  slug: string
-  servers: EpisodeServer[]
-  pageSize?: number
-  onPlay?: (args: { serverIdx: number; epIdx: number; src: EpisodeSource }) => void
+  slug: string;
+  servers: EpisodeServer[];
+  pageSize?: number;
+  onPlay?: (args: { serverIdx: number; epIdx: number; src: EpisodeSource }) => void;
 }) {
-  const [serverIdx, setServerIdx] = useState(0)
-  const [page, setPage] = useState(1)
+  const [serverIdx, setServerIdx] = useState(0);
+  const [page, setPage] = useState(1);
 
-  const currentServer = servers[serverIdx] ?? { server_name: 'Server', server_data: [] }
+  // NEW: cho phép tăng số lượng mỗi trang
+  const [perPage, setPerPage] = useState(pageSize);
+  useEffect(() => setPerPage(pageSize), [pageSize]); // nếu prop đổi thì sync
+
+  const currentServer = servers[serverIdx] ?? { server_name: "Server", server_data: [] };
 
   const sortedEpisodes = useMemo(() => {
     const getNum = (s?: string) => {
-      const m = String(s ?? '').match(/\d+/)
-      return m ? parseInt(m[0], 10) : Number.POSITIVE_INFINITY
-    }
-    return [...(currentServer.server_data ?? [])].sort((a, b) => getNum(a.name) - getNum(b.name))
-  }, [currentServer.server_data])
+      const m = String(s ?? "").match(/\d+/);
+      return m ? parseInt(m[0], 10) : Number.POSITIVE_INFINITY;
+    };
+    return [...(currentServer.server_data ?? [])].sort(
+      (a, b) => getNum(a.name) - getNum(b.name)
+    );
+  }, [currentServer.server_data]);
 
-  const start = (page - 1) * pageSize
-  const view = sortedEpisodes.slice(start, start + pageSize)
+  const total = sortedEpisodes.length;
+  const start = (page - 1) * perPage;
+  const end = start + perPage;
+  const view = sortedEpisodes.slice(start, end);
 
-  useEffect(() => { setPage(1) }, [serverIdx])
+  // reset về page 1 khi đổi server
+  useEffect(() => {
+    setPage(1);
+  }, [serverIdx]);
+
+  // NEW: handler tăng số lượng
+  const handleIncreasePerPage = () => {
+    setPerPage((n) => n + 40);
+    setPage(1); // quay về trang đầu cho dễ nhìn (có thể bỏ nếu không muốn)
+  };
 
   return (
     <div className="rounded-2xl bg-white/5 p-5 ring-1 ring-white/10">
+      {/* Thanh điều khiển nhỏ */}
+      <div className="mb-4 flex flex-wrap items-center gap-2 text-sm text-white/80">
+        <span className="mr-2">Server:</span>
+        <select
+          value={serverIdx}
+          onChange={(e) => setServerIdx(Number(e.target.value))}
+          className="bg-white/10 text-white rounded-md px-2 py-1 ring-1 ring-white/10"
+        >
+          {servers.map((s, i) => (
+            <option key={i} value={i} className="bg-slate-900">
+              {s.server_name ?? `Server ${i + 1}`}
+            </option>
+          ))}
+        </select>
+
+        <span className="ml-auto" />
+        <span>
+          Hiển thị: <b>{view.length}</b>/<b>{total}</b> • Mỗi trang: <b>{perPage}</b>
+        </span>
+
+        <button
+          onClick={handleIncreasePerPage}
+          className="ml-2 rounded-md bg-white/10 px-3 py-1 ring-1 ring-white/10 hover:bg-white/15"
+          title="Tăng thêm 40/t trang"
+        >
+          +40
+        </button>
+
+        {/* Tuỳ chọn: nhanh chọn 40/80/120/All */}
+        {/* <div className="flex gap-1">
+          {[40, 80, 120].map((n) => (
+            <button key={n} onClick={() => { setPerPage(n); setPage(1); }}
+              className={`rounded-md px-2 py-1 ring-1 ring-white/10 ${perPage===n?'bg-emerald-500 text-white':'bg-white/10 hover:bg-white/15'}`}>
+              {n}
+            </button>
+          ))}
+          <button onClick={() => { setPerPage(total || 9999); setPage(1); }}
+            className="rounded-md px-2 py-1 ring-1 ring-white/10 bg-white/10 hover:bg-white/15">
+            All
+          </button>
+        </div> */}
+      </div>
 
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2">
         {view.map((ep, i) => {
-          const epIdx = start + i 
+          const epIdx = start + i;
           return (
             <button
               key={`${servers[serverIdx]?.server_name}-${epIdx}-${ep.name}`}
               onClick={() => onPlay?.({ serverIdx, epIdx, src: ep })}
-              className="h-10 rounded-lg bg-white/10 hover:bg-white/15 text-sm font-semibold ring-1 ring-white/10"
+              className="h-10 rounded-lg bg-white/10 hover:bg-white/15 text-sm font-semibold ring-1 cursor-pointer ring-white/10"
               title={ep.name ?? `Tập ${epIdx + 1}`}
             >
               {ep.name ?? `Tập ${epIdx + 1}`}
             </button>
-          )
+          );
         })}
       </div>
+
+      {/* (Tuỳ chọn) điều khiển trang nếu bạn đang dùng nhiều page */}
+      {total > perPage && (
+        <div className="mt-4 flex items-center justify-center gap-2">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="rounded-md bg-white/10 px-3 py-1 ring-1 ring-white/10 disabled:opacity-50"
+          >
+            Trước
+          </button>
+          <span className="text-white/70 text-sm">
+            Trang {page} / {Math.max(1, Math.ceil(total / perPage))}
+          </span>
+          <button
+            disabled={end >= total}
+            onClick={() => setPage((p) => p + 1)}
+            className="rounded-md bg-white/10 px-3 py-1 ring-1 ring-white/10 disabled:opacity-50"
+          >
+            Sau
+          </button>
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
 function Overview({ overview, stills }: { overview: string; stills: string[] }) {

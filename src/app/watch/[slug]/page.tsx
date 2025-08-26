@@ -30,7 +30,7 @@ export default function WatchPage() {
           const saved = JSON.parse(raw) as { serverIdx: number; epIdx: number }
           return parseIntSafe(saved.serverIdx, 0)
         }
-      } catch {}
+      } catch { }
     }
     return 0
   })
@@ -44,7 +44,7 @@ export default function WatchPage() {
           const saved = JSON.parse(raw) as { serverIdx: number; epIdx: number }
           return parseIntSafe(saved.epIdx, 0)
         }
-      } catch {}
+      } catch { }
     }
     return 0
   })
@@ -91,13 +91,14 @@ export default function WatchPage() {
     if (!HISTORY_KEY) return
     try {
       localStorage.setItem(HISTORY_KEY, JSON.stringify({ serverIdx, epIdx, t: Date.now() }))
-    } catch {}
+    } catch { }
   }, [HISTORY_KEY, serverIdx, epIdx])
 
   const servers: EpisodeServer[] = detail?.episodes ?? []
   const eps: EpisodeSource[] = servers[serverIdx]?.server_data ?? []
   const currentEp = eps[epIdx]
-
+  const [visible, setVisible] = useState(40)
+  const view = useMemo(() => eps.slice(0, visible), [eps, visible])
   const playable = useMemo(() => ({
     m3u8: currentEp?.link_m3u8 || null,
     embed: currentEp?.link_embed || null,
@@ -107,22 +108,21 @@ export default function WatchPage() {
   if (error || !detail) return <main className="min-h-screen grid place-items-center text-red-400">Lỗi: {error || 'Không tìm thấy dữ liệu'}</main>
 
   return (
-    <main className="min-h-screen bg-[#0b0e13] text-white">
-      {/* Header */}
-      <div className="container mx-auto px-4 py-4">
-        <h1 className="text-xl md:text-2xl font-bold">
-          {detail.name} {detail.episode_current ? <span className="text-white/60">• {detail.episode_current}</span> : null}
-        </h1>
-        {detail.year ? <p className="text-white/60">{detail.year}</p> : null}
-      </div>
+    <main className="min-h-screen bg-[#0b0e13] text-white py-3">
 
-      {/* Player */}
       <div className="container mx-auto px-4">
         <div className="aspect-video w-full overflow-hidden rounded-2xl ring-1 ring-white/10 bg-black">
           <SmartPlayer m3u8={playable.m3u8} embed={playable.embed} title={detail.name} />
         </div>
       </div>
-
+      <div className="container mx-auto px-4 py-4">
+        <h1 className="text-xl md:text-2xl font-bold">
+          {detail.name}{" "}
+          <span className="text-white/60">
+            • {eps[epIdx]?.name || `Tập ${epIdx + 1}`}
+          </span>
+        </h1>
+      </div>
       {/* Controls */}
       <div className="container mx-auto px-4 mt-4 grid gap-4 md:grid-cols-[280px,1fr]">
         {/* Servers */}
@@ -133,9 +133,8 @@ export default function WatchPage() {
               <button
                 key={`${sv.server_name}-${i}`}
                 onClick={() => setServerIdx(i)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-semibold ring-1 transition ${
-                  i === serverIdx ? 'bg-white text-black ring-white/10' : 'text-white/80 bg-white/5 hover:bg-white/10 ring-white/10'
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold ring-1 transition ${i === serverIdx ? 'bg-white text-black ring-white/10' : 'text-white/80 bg-white/5 hover:bg-white/10 ring-white/10'
+                  }`}
               >
                 {sv.server_name}
               </button>
@@ -148,6 +147,24 @@ export default function WatchPage() {
           <div className="mb-2 flex items-center justify-between">
             <h3 className="font-semibold">Danh sách tập</h3>
             <div className="flex items-center gap-2">
+              {/* nút tăng số lượng hiển thị */}
+              <button
+                onClick={() => setVisible((v) => Math.min(eps.length, v + 40))}
+                disabled={visible >= eps.length}
+                className="px-3 py-2 rounded-lg bg-white/10 ring-1 ring-white/10 disabled:opacity-50"
+                title="Hiển thị thêm 40 tập"
+              >
+                +40
+              </button>
+              <button
+                onClick={() => setVisible(eps.length)}
+                disabled={visible >= eps.length}
+                className="px-3 py-2 rounded-lg bg-white/10 ring-1 ring-white/10 disabled:opacity-50"
+                title="Hiển thị tất cả tập"
+              >
+                All
+              </button>
+
               <button
                 onClick={() => setEpIdx((v) => Math.max(0, v - 1))}
                 disabled={epIdx <= 0}
@@ -159,7 +176,7 @@ export default function WatchPage() {
               <button
                 onClick={() => setEpIdx((v) => Math.min((eps.length || 1) - 1, v + 1))}
                 disabled={epIdx >= (eps.length - 1)}
-                className="p-2 rounded-lg bg-white/10 disabled:opacity-50"
+                className="p-2 rounded-lg bg-white/10 disabled:opacity-50 cursor-pointer"
                 title="Tập sau"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -170,22 +187,44 @@ export default function WatchPage() {
           {eps.length === 0 ? (
             <div className="text-white/70">Chưa có dữ liệu tập của máy chủ này.</div>
           ) : (
-            <div className="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-2">
-              {eps.map((ep, i) => (
-                <button
-                  key={`${i}-${ep.name}`}
-                  onClick={() => setEpIdx(i)}
-                  className={`h-10 rounded-lg text-sm font-semibold ring-1 ring-white/10 transition ${
-                    i === epIdx ? 'bg-white text-black' : 'bg-white/10 hover:bg-white/15'
-                  }`}
-                  title={ep.name ?? `Tập ${i + 1}`}
-                >
-                  {ep.name ?? `Tập ${i + 1}`}
-                </button>
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-2">
+                {view.map((ep, i) => (
+                  <button
+                    key={`${i}-${ep.name}`}
+                    onClick={() => setEpIdx(i)}
+                    className={`h-10 rounded-lg text-sm cursor-pointer font-semibold ring-1 ring-white/10 transition ${i === epIdx ? "bg-white text-black" : "bg-white/10 hover:bg-white/15"
+                      }`}
+                    title={ep.name ?? `Tập ${i + 1}`}
+                  >
+                    {ep.name ?? `Tập ${i + 1}`}
+                  </button>
+                ))}
+              </div>
+
+              {visible < eps.length && (
+                <div className="mt-3 flex justify-center gap-2">
+                  <button
+                    onClick={() => setVisible((v) => Math.min(eps.length, v + 40))}
+                    className="px-4 py-2 rounded-lg bg-white/10 ring-1 ring-white/10 hover:bg-white/15"
+                  >
+                    Tải thêm 40
+                  </button>
+                  <button
+                    onClick={() => setVisible(eps.length)}
+                    className="px-4 py-2 rounded-lg bg-white/10 ring-1 ring-white/10 hover:bg-white/15"
+                  >
+                    Hiển thị tất cả
+                  </button>
+                </div>
+              )}
+              <p className="mt-2 text-center text-xs text-white/60">
+                Đang hiển thị {Math.min(visible, eps.length)}/{eps.length} tập
+              </p>
+            </>
           )}
         </div>
+
       </div>
 
       <div className="container mx-auto px-4 mt-6">
@@ -236,7 +275,7 @@ function HlsVideo({ src, title }: { src: string; title: string }) {
 
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = src
-      video.play().catch(() => {})
+      video.play().catch(() => { })
       return
     }
 
@@ -260,7 +299,7 @@ function HlsVideo({ src, title }: { src: string; title: string }) {
     }
 
     return () => {
-      try { hlsRef.current?.destroy() } catch {}
+      try { hlsRef.current?.destroy() } catch { }
       if (video) video.removeAttribute('src')
     }
   }, [src])
