@@ -35,10 +35,10 @@ const MovieSection = ({ title, movies, slug }: MovieSectionProps) => (
     <div className="flex items-center justify-between mb-4">
       <h2 className="text-2xl sm:text-3xl font-bold text-red-500">{title}</h2>
       <Link
-        href={`/category/${slug}`}
+        href={`/categories/${slug}`}
         className="text-sm sm:text-base text-red-500 hover:underline"
       >
-        Xem thêm →
+        Xem thêm
       </Link>
     </div>
 
