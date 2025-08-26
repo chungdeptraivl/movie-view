@@ -44,7 +44,7 @@ const MovieSection = ({ title, movies, slug }: MovieSectionProps) => (
 
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
       {movies.map((movie, i) => (
-        <Link key={movie.slug || i} href={`/movie/${movie.slug}`}>
+        <Link key={movie.slug || i} href={`/movies/${movie.slug}`}>
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}

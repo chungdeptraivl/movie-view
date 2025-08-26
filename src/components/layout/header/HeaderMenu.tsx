@@ -57,7 +57,7 @@ export default function HeaderMenu() {
         <MenubarContent className="bg-gray-900 text-gray-200 p-4 rounded-lg w-[500px]">
           <div className="grid grid-cols-4 gap-2">
             {categories.map((cat) => (
-              <MenubarItem key={cat.id} asChild>
+              <MenubarItem key={String(cat.id)} asChild>
                 <Link
                   href={`/categories/${cat.slug}`}
                   className="px-3 py-2 text-sm rounded-md hover:bg-gray-800 hover:text-red-400 transition cursor-pointer"

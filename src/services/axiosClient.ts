@@ -1,27 +1,43 @@
-import axios from "axios";
+// services/apiClient.ts
+import { AxiosRequestConfig } from "axios";
+import { getAxios } from "./http";
+import { ApiBaseKey, resolveBaseByPath } from "../../config/api";
 
-export const axiosClient = axios.create({
-  baseURL: "https://phimapi.com/v1/api/", 
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+type RequestOpts = {
+  baseKey?: ApiBaseKey;    
+  fallbackBases?: ApiBaseKey[]; 
+  config?: AxiosRequestConfig;
+};
 
-axiosClient.interceptors.request.use(
-  (config) => {
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+export async function apiGet<T>(path: string, opts: RequestOpts = {}): Promise<T> {
+  const primary = opts.baseKey ?? resolveBaseByPath(path);
+  const candidates = [primary, ...(opts.fallbackBases ?? [])];
+
+  let lastErr: any;
+  for (const key of candidates) {
+    try {
+      const axios = getAxios(key);
+      const res = await axios.get<T>(path, opts.config);
+      return res.data;
+    } catch (e) {
+      lastErr = e;
+    }
   }
-);
+  throw lastErr;
+}
 
-axiosClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    console.error("API Error:", error);
-    return Promise.reject(error);
+export async function apiPost<T>(path: string, body: any, opts: RequestOpts = {}): Promise<T> {
+  const primary = opts.baseKey ?? resolveBaseByPath(path);
+  const candidates = [primary, ...(opts.fallbackBases ?? [])];
+  let lastErr: any;
+  for (const key of candidates) {
+    try {
+      const axios = getAxios(key);
+      const res = await axios.post<T>(path, body, opts.config);
+      return res.data;
+    } catch (e) {
+      lastErr = e;
+    }
   }
-);
+  throw lastErr;
+}
