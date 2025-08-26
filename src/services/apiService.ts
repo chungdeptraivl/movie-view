@@ -62,8 +62,9 @@ export class MovieService {
   async getMoviesByType(apiPath: string, page = 1, limit = 30) {
     const q = `?page=${page}&limit=${limit}`;
     const data = await apiGet<any>(`${apiPath}${q}`, {
-      fallbackBases: ["phim_v1"],
+      baseKey: "phim_v1", 
     });
+
     const items = data?.data?.items ?? data?.items ?? [];
     return items.map((item: any) => ({
       id: item._id || item.id,
