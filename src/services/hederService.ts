@@ -1,41 +1,33 @@
 import { apiGet } from "./axiosClient";
 
-
-
 export interface Prop {
   id: string;
   name: string;
   slug?: string;
 }
 
-export async function fetchCategory(): Promise<Prop[]> {
+function normalizeList(data: any): any[] {
+  return data?.data?.items ?? data?.data ?? data ?? [];
+}
+
+function mapItem(x: any): Prop {
+  return {
+    id: x._id ?? x.id ?? x.slug,
+    name: x.name,
+    slug: x.slug,
+  };
+}
+
+async function fetchData(endpoint: string): Promise<Prop[]> {
   try {
-    const data = await apiGet<any>("/the-loai");
-    const items = data?.data?.items ?? data?.data ?? data ?? [];
-    return items.map((x: any) => ({
-      id: x._id ?? x.id ?? x.slug,
-      name: x.name,
-      slug: x.slug,
-    }));
+    const data = await apiGet<any>(endpoint);
+    const list = normalizeList(data);
+    return Array.isArray(list) ? list.map(mapItem) : [];
   } catch (err) {
-    console.error("fetchCategory error:", err);
+    console.error(`fetchData error [${endpoint}]:`, err);
     return [];
   }
 }
 
-export async function fetchCountries(): Promise<Prop[]> {
-  try {
-    const res = await apiGet<any>("/quoc-gia");
-    const list = res.data?.data ?? res.data ?? [];
-    return Array.isArray(list)
-      ? list.map((x: any) => ({
-          id: x._id ?? x.id ?? x.slug,
-          name: x.name,
-          slug: x.slug,
-        }))
-      : [];
-  } catch (error) {
-    console.error("fetchCountries error:", error);
-    return [];
-  }
-}
+export const fetchCategory = () => fetchData("/the-loai");
+export const fetchCountries = () => fetchData("/quoc-gia");

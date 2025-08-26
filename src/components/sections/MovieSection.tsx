@@ -57,7 +57,6 @@ const MovieSection = ({ title, movies, slug }: MovieSectionProps) => (
               className="w-full aspect-[0.7] object-cover transition-transform duration-300 group-hover:scale-110"
             />
 
-            {/* Episode / Status */}
             {movie.episode_current && (
               <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded">
                 {movie.episode_current}

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   Menubar,
   MenubarContent,
@@ -9,37 +8,26 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { fetchCategory, fetchCountries, Prop } from "@/services/hederService";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { data } from "framer-motion/client";
-
-const countries = [
-  "Việt Nam",
-  "Mỹ",
-  "Hàn Quốc",
-  "Nhật Bản",
-  "Trung Quốc",
-  "Thái Lan",
-  "Ấn Độ",
-  "Anh",
-  "Pháp",
-  "Úc",
-  "Đài Loan",
-  "Hong Kong",
-];
 const types = ["Phim bộ", "Phim lẻ", "Chiếu rạp"];
 
 export default function HeaderMenu() {
-
   const [categories, setCategories] = useState<Prop[]>([]);
   const [countries, setCountries] = useState<Prop[]>([]);
-  
+
   useEffect(() => {
     fetchCategory()
-      .then((data) => setCategories(data))
+      .then((data) => {
+        setCategories(data);
+      })
       .catch((err) => console.error("Lỗi load thể loại:", err));
 
-    fetchCountries().then((data) => setCountries(data))
-    .catch((err) => console.error("Lỗi load quốc gia:", err))
+    fetchCountries()
+      .then((data) => {
+        setCountries(data);
+      })
+      .catch((err) => console.error("Lỗi load quốc gia:", err));
   }, []);
 
   return (

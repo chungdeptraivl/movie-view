@@ -1,7 +1,6 @@
 import { normalizeImage } from "@/lib/utils";
 import { apiGet } from "./axiosClient";
 
-
 export interface Movie {
   id: string;
   name: string;
@@ -11,7 +10,6 @@ export interface Movie {
   year: number;
   episode_current: string;
 }
-
 
 export interface EpisodeSource {
   name: string;
@@ -24,7 +22,6 @@ export interface EpisodeServer {
   server_name: string;
   server_data: EpisodeSource[];
 }
-
 
 export interface MovieDetail {
   id: string;
@@ -49,84 +46,119 @@ export interface MovieDetail {
   episodes?: EpisodeServer[];
 }
 
-
+/** Utils */
 function toStringArray(val: unknown): string[] {
   if (Array.isArray(val)) return val.filter(Boolean).map(String);
   if (typeof val === "string") {
-    return val.split(/[,|]/).map(s => s.trim()).filter(Boolean);
+    return val
+      .split(/[,|]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
   }
   return [];
 }
 
-export class MovieService {
-  async getMoviesByType(apiPath: string, page = 1, limit = 30) {
-    const q = `?page=${page}&limit=${limit}`;
-    const data = await apiGet<any>(`${apiPath}${q}`, {
-      baseKey: "phim_v1", 
-    });
+function safeId(obj: any, fallback: string) {
+  return obj?._id ?? obj?.id ?? obj?.slug ?? fallback;
+}
 
-    const items = data?.data?.items ?? data?.items ?? [];
-    return items.map((item: any) => ({
-      id: item._id || item.id,
-      name: item.name,
-      slug: item.slug,
-      poster_url: normalizeImage(item.poster_url),
-      thumb_url: normalizeImage(item.thumb_url),
-      year: Number(item.year) || 0,
-      episode_current: String(item.episode_current ?? ""),
-    }));
+function normalizeMovie(item: any): Movie {
+  return {
+    id: safeId(item, ""),
+    name: item.name ?? "",
+    slug: item.slug ?? "",
+    poster_url: normalizeImage(item.poster_url),
+    thumb_url: normalizeImage(item.thumb_url),
+    year: Number(item.year) || 0,
+    episode_current: String(item.episode_current ?? ""),
+  };
+}
+
+function normalizeEpisodeServer(sv: any): EpisodeServer {
+  return {
+    server_name: sv?.server_name ?? sv?.name ?? "Server",
+    server_data: Array.isArray(sv?.server_data)
+      ? sv.server_data.map(
+          (ep: any): EpisodeSource => ({
+            name: ep?.name ?? ep?.episode ?? "Tập",
+            filename: ep?.filename ?? null,
+            link_embed: ep?.link_embed ?? null,
+            link_m3u8: ep?.link_m3u8 ?? ep?.link_m3U8 ?? null,
+          })
+        )
+      : [],
+  };
+}
+
+/** Services */
+export class MovieService {
+  async getMoviesByType(
+    apiPath: string,
+    page = 1,
+    limit = 30
+  ): Promise<Movie[]> {
+    try {
+      const q = `?page=${page}&limit=${limit}`;
+      const data = await apiGet<any>(`${apiPath}${q}`, { baseKey: "phim_v1" });
+      const items: any[] = data?.data?.items ?? data?.items ?? [];
+      return items.map(normalizeMovie);
+    } catch (err) {
+      console.error("getMoviesByType error:", err);
+      return [];
+    }
   }
 }
+
 export class MovieDetailService {
   async getMovieDetail(slug: string): Promise<MovieDetail | null> {
-    const safe = encodeURIComponent(slug.trim());
-    const body = await apiGet<any>(`/phim/${safe}`, { fallbackBases: ["phim_v1"] });
+    try {
+      const safeSlug = encodeURIComponent(slug.trim());
+      const body = await apiGet<any>(`/phim/${safeSlug}`, {
+        fallbackBases: ["phim_v1"],
+      });
 
-    const movie = body?.movie ?? body?.data ?? body;
-    const episodesRaw: any[] = body?.episodes ?? body?.episode ?? [];
-    if (!movie) return null;
+      const movie = body?.movie ?? body?.data ?? body;
+      if (!movie) return null;
 
-    // Gán đầy đủ field của MovieDetail
-    const detail: MovieDetail = {
-      id: movie._id || movie.id || movie.slug || safe,
-      name: movie.name ?? movie.title ?? "",
-      slug: movie.slug ?? safe,
-      origin_name: movie.origin_name,
-      year: Number(movie.year) || undefined,
-      time: movie.time,
-      quality: movie.quality,
-      lang: movie.lang,
-      type: movie.type,
-      episode_current: movie.episode_current ?? movie.episode_total,
-      content: movie.content ?? movie.description,
-      trailer_url: movie.trailer_url ?? movie.trailer ?? null,
+      const episodesRaw: any[] = body?.episodes ?? body?.episode ?? [];
 
-      poster_url: normalizeImage(movie.poster_url),
-      thumb_url: normalizeImage(movie.thumb_url),
+      return {
+        id: safeId(movie, safeSlug),
+        name: movie.name ?? movie.title ?? "",
+        slug: movie.slug ?? safeSlug,
+        origin_name: movie.origin_name,
+        year: Number(movie.year) || undefined,
+        time: movie.time,
+        quality: movie.quality,
+        lang: movie.lang,
+        type: movie.type,
+        episode_current: movie.episode_current ?? movie.episode_total,
+        content: movie.content ?? movie.description,
+        trailer_url: movie.trailer_url ?? movie.trailer ?? null,
 
-      rating: typeof movie.rating === "number" ? movie.rating : Number(movie.rating) || null,
-      category: movie.category ?? movie.categories ?? [],
-      country: movie.country ?? movie.countries ?? [],
-      actor: toStringArray(movie.actor ?? movie.actors),
-      director: toStringArray(movie.director ?? movie.directors),
+        poster_url: normalizeImage(movie.poster_url),
+        thumb_url: normalizeImage(movie.thumb_url),
 
-      episodes: Array.isArray(episodesRaw)
-        ? episodesRaw.map((sv: any): EpisodeServer => ({
-            server_name: sv?.server_name ?? sv?.name ?? "Server",
-            server_data: Array.isArray(sv?.server_data)
-              ? sv.server_data.map((ep: any) => ({
-                  name: ep?.name ?? ep?.episode ?? "Tập",
-                  filename: ep?.filename ?? null,
-                  link_embed: ep?.link_embed ?? null,
-                  link_m3u8: ep?.link_m3u8 ?? ep?.link_m3U8 ?? null,
-                }))
-              : [],
-          }))
-        : [],
-    };
+        rating:
+          typeof movie.rating === "number"
+            ? movie.rating
+            : Number(movie.rating) || null,
 
-    return detail;
+        category: movie.category ?? movie.categories ?? [],
+        country: movie.country ?? movie.countries ?? [],
+        actor: toStringArray(movie.actor ?? movie.actors),
+        director: toStringArray(movie.director ?? movie.directors),
+
+        episodes: Array.isArray(episodesRaw)
+          ? episodesRaw.map(normalizeEpisodeServer)
+          : [],
+      };
+    } catch (err) {
+      console.error("getMovieDetail error:", err);
+      return null;
+    }
   }
 }
-export const movieDetailService = new MovieDetailService();
+
 export const movieService = new MovieService();
+export const movieDetailService = new MovieDetailService();
