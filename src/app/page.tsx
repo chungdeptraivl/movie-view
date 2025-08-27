@@ -15,7 +15,7 @@ const HomePage = () => {
       <PersonListSection />
       <PersonListSection />
       <CardListSection title="Movie Genres" data={movieGenres} />
-      <CardListSection title="Movie Countries" data={movieCountries} />
+      {/* <CardListSection title="Movie Countries" data={movieCountries} /> */}
     </main>
   );
 };

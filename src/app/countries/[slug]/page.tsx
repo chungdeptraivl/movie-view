@@ -81,7 +81,7 @@ export default function MoviesPage() {
         const run = async () => {
             try {
                 setLoading(true);
-                const res = await apiGet<any>(`/quoc-gia//${slug}?page=${page}&limit=15`, { baseKey: "phim_v1" });
+                const res = await apiGet<any>(`/quoc-gia/${slug}?page=${page}&limit=15`, { baseKey: "phim_v1" });
                 const data = res?.data ?? {};
 
                 setCategoryTitle(data.titlePage || slug);

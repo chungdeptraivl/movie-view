@@ -50,7 +50,7 @@ export default function HeaderMenu() {
               <MenubarItem key={String(cat.id)} asChild>
                 <Link
                   href={`/categories/${cat.slug}`}
-                  className="px-3 py-2 text-sm rounded-md hover:bg-gray-800 hover:text-red-400 transition cursor-pointer"
+                  className="px-3 py-2 text-sm rounded-md hover:bg-gray-800 hover:text-red-400 transition cursor-pointer justify-center"
                 >
                   {cat.name}
                 </Link>
@@ -70,7 +70,7 @@ export default function HeaderMenu() {
               <MenubarItem key={c.id} asChild>
                 <Link
                   href={`/countries/${c.slug}`}
-                  className="px-3 py-2 text-sm rounded-md hover:bg-gray-800 hover:text-red-400 transition cursor-pointer"
+                  className="px-3 py-2 text-sm rounded-md hover:bg-gray-800 hover:text-red-400 transition cursor-pointer justify-center"
                 >
                   {c.name}
                 </Link>

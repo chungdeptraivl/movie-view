@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Film, XCircle } from "lucide-react";
+import { Search, Film, XCircle,Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,26 +11,33 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-const movies = [
-  { id: 1, title: "Avengers: Endgame", slug: "avengers-endgame" },
-  { id: 2, title: "Spider-Man: No Way Home", slug: "spiderman-no-way-home" },
-  { id: 3, title: "The Batman", slug: "the-batman" },
-  { id: 4, title: "Doctor Strange 2", slug: "doctor-strange-2" },
-];
-const suggestions = [
-  { id: 5, title: "Avengers: Infinity War", slug: "avengers-infinity-war" },
-  { id: 6, title: "Spider-Man: Homecoming", slug: "spiderman-homecoming" },
-  { id: 7, title: "The Dark Knight", slug: "the-dark-knight" },
-  { id: 8, title: "Doctor Strange", slug: "doctor-strange" },
-  { id: 9, title: "Iron Man", slug: "iron-man" },
-];
+import { movieService } from "@/services/apiService";
 
 export default function SearchDialog() {
   const [search, setSearch] = useState("");
-  const filtered = movies.filter((m) =>
-    m.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(async () => {
+      if (search.trim()) {
+        setLoading(true);
+        try {
+          const movies = await movieService.searchMovies(search);
+          setResults(movies);
+        } catch (err) {
+          console.error("Search error:", err);
+          setResults([]);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [search]);
 
   return (
     <Dialog>
@@ -44,11 +51,14 @@ export default function SearchDialog() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl w-full mt-[-15vh] p-4 md:p-6 bg-gray-900 text-white rounded-2xl shadow-2xl border border-gray-700">
+      <DialogContent
+        className="sm:max-w-2xl w-full mt-[-15vh] p-4 md:p-6 bg-gray-900 text-white rounded-2xl shadow-2xl border border-gray-700"
+      >
         <DialogTitle className="text-xl font-semibold mb-4 text-red-400">
           Tìm kiếm phim
         </DialogTitle>
 
+        {/* Input search */}
         <div className="relative md:mb-4">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <Input
@@ -60,34 +70,31 @@ export default function SearchDialog() {
           />
         </div>
 
-        <div className="mt-2 max-h-72 overflow-y-auto">
-          {search.trim() === "" ? (
-            <>
-              <p className="text-sm text-gray-400 mb-2">Gợi ý cho bạn</p>
-              <ul className="grid grid-cols-1 gap-2">
-                {suggestions.map((movie) => (
-                  <li key={movie.id}>
-                    <Link
-                      href={`/movies/${movie.slug}`}
-                      className="flex items-center gap-2 px-3 py-3 rounded-lg bg-gray-800/40 hover:bg-gray-800 hover:text-red-400 transition cursor-pointer"
-                    >
-                      <Film className="w-4 h-4 text-red-400" />
-                      <span>{movie.title}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : filtered.length > 0 ? (
+        {/* Kết quả tìm kiếm */}
+        <div className="mt-2 max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-red-500 scrollbar-track-gray-800 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
+          {loading ? (
+             <div className="flex justify-center items-center py-6">
+              <Loader2 className="w-6 h-6 text-red-500 animate-spin" />
+            </div>
+          ) : search.trim() === "" ? (
+            <p className="text-gray-400 text-center py-4">
+              Nhập từ khóa để tìm phim
+            </p>
+          ) : results.length > 0 ? (
             <ul className="space-y-2">
-              {filtered.map((movie) => (
+              {results.map((movie) => (
                 <li key={movie.id}>
                   <Link
                     href={`/movies/${movie.slug}`}
-                    className="flex items-center gap-2 px-3 py-3 rounded-lg hover:bg-gray-800 hover:text-red-400 transition cursor-pointer"
+                    onClick={() => setSearch("")}
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 transition cursor-pointer"
                   >
-                    <Film className="w-4 h-4 text-red-400" />
-                    <span>{movie.title}</span>
+                    <img
+                      src={movie.thumb_url}
+                      alt={movie.name}
+                      className="w-10 h-14 object-cover rounded-md border border-gray-700"
+                    />
+                    <span className="text-white">{movie.name}</span>
                   </Link>
                 </li>
               ))}

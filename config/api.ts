@@ -1,6 +1,6 @@
 export const API_BASES = {
   phim_root: "https://phimapi.com",
-  phim_v1:   "https://phimapi.com/v1/api/",
+  phim_v1:   "https://phimapi.com/v1/api",
 } as const;
 
 export type ApiBaseKey = keyof typeof API_BASES;
