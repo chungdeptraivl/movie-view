@@ -157,7 +157,7 @@ export default function MovieDetailPage() {
                                 </Link>
                                 <button
                                     onClick={() => setLike((v) => !v)}
-                                    className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold focus:outline-none focus:ring-2 ${like
+                                    className={`cursor-pointer inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold focus:outline-none focus:ring-2 ${like
                                         ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30 focus:ring-rose-400'
                                         : 'bg-white/10 text-white hover:bg-white/15 focus:ring-white/30'
                                         }`}
@@ -176,12 +176,12 @@ export default function MovieDetailPage() {
                         { key: 'overview', label: 'Tổng quan', icon: <BadgeInfo className="h-4 w-4" /> },
                         { key: 'episodes', label: 'Tập', icon: <Tv className="h-4 w-4" /> },
                         { key: 'cast', label: 'Diễn viên', icon: <Film className="h-4 w-4" /> },
-                        { key: 'photos', label: 'Ảnh', icon: <ChevronRight className="h-4 w-4 rotate-90" /> },
+                        // { key: 'photos', label: 'Ảnh', icon: <ChevronRight className="h-4 w-4 rotate-90" /> },
                     ].map((t) => (
                         <button
                             key={t.key}
                             onClick={() => setActiveTab(t.key as any)}
-                            className={`mr-1 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${activeTab === (t.key as any) ? 'bg-white text-black shadow' : 'text-white/80 hover:bg-white/10'
+                            className={`mr-1 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition cursor-pointer ${activeTab === (t.key as any) ? 'bg-white text-black shadow' : 'text-white/80 hover:bg-white/10'
                                 }`}
                         >
                             {t.icon}
@@ -202,7 +202,7 @@ export default function MovieDetailPage() {
                         />
                     )}
                     {activeTab === 'cast' && <CastList cast={movie.cast} />}
-                    {activeTab === 'photos' && <PhotoGrid stills={movie.stills} />}
+                    {/* {activeTab === 'photos' && <PhotoGrid stills={movie.stills} />} */}
                     {activeTab === 'more' && <MoreCarousel items={[]} />}
                 </div>
             </div>
@@ -249,9 +249,8 @@ function EpisodesPanel({
   const [serverIdx, setServerIdx] = useState(0);
   const [page, setPage] = useState(1);
 
-  // NEW: cho phép tăng số lượng mỗi trang
   const [perPage, setPerPage] = useState(pageSize);
-  useEffect(() => setPerPage(pageSize), [pageSize]); // nếu prop đổi thì sync
+  useEffect(() => setPerPage(pageSize), [pageSize]); 
 
   const currentServer = servers[serverIdx] ?? { server_name: "Server", server_data: [] };
 
@@ -270,26 +269,23 @@ function EpisodesPanel({
   const end = start + perPage;
   const view = sortedEpisodes.slice(start, end);
 
-  // reset về page 1 khi đổi server
   useEffect(() => {
     setPage(1);
   }, [serverIdx]);
 
-  // NEW: handler tăng số lượng
   const handleIncreasePerPage = () => {
     setPerPage((n) => n + 40);
-    setPage(1); // quay về trang đầu cho dễ nhìn (có thể bỏ nếu không muốn)
+    setPage(1);
   };
 
   return (
     <div className="rounded-2xl bg-white/5 p-5 ring-1 ring-white/10">
-      {/* Thanh điều khiển nhỏ */}
       <div className="mb-4 flex flex-wrap items-center gap-2 text-sm text-white/80">
         <span className="mr-2">Server:</span>
         <select
           value={serverIdx}
           onChange={(e) => setServerIdx(Number(e.target.value))}
-          className="bg-white/10 text-white rounded-md px-2 py-1 ring-1 ring-white/10"
+          className="bg-white/10 text-white rounded-md px-2 py-1 ring-1 ring-white/10 cursor-pointer"
         >
           {servers.map((s, i) => (
             <option key={i} value={i} className="bg-slate-900">
@@ -305,7 +301,7 @@ function EpisodesPanel({
 
         <button
           onClick={handleIncreasePerPage}
-          className="ml-2 rounded-md bg-white/10 px-3 py-1 ring-1 ring-white/10 hover:bg-white/15"
+          className="ml-2 rounded-md bg-white/10 px-3 py-1 ring-1 ring-white/10 hover:bg-white/15 cursor-pointer"
           title="Tăng thêm 40/t trang"
         >
           +40
@@ -342,23 +338,22 @@ function EpisodesPanel({
         })}
       </div>
 
-      {/* (Tuỳ chọn) điều khiển trang nếu bạn đang dùng nhiều page */}
       {total > perPage && (
         <div className="mt-4 flex items-center justify-center gap-2">
           <button
             disabled={page === 1}
             onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="rounded-md bg-white/10 px-3 py-1 ring-1 ring-white/10 disabled:opacity-50"
+            className="rounded-md bg-white/10 px-3 py-1 ring-1 ring-white/10 disabled:opacity-50 cursor-pointer"
           >
             Trước
           </button>
-          <span className="text-white/70 text-sm">
+          <span className="text-white/70 text-sm cursor-pointer">
             Trang {page} / {Math.max(1, Math.ceil(total / perPage))}
           </span>
           <button
             disabled={end >= total}
             onClick={() => setPage((p) => p + 1)}
-            className="rounded-md bg-white/10 px-3 py-1 ring-1 ring-white/10 disabled:opacity-50"
+            className="rounded-md bg-white/10 px-3 py-1 ring-1 ring-white/10 disabled:opacity-50 cursor-pointer"
           >
             Sau
           </button>

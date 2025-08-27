@@ -10,42 +10,27 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useEffect, useState } from "react";
+import { fetchCategory, fetchCountries, Prop } from "@/services/hederService";
 
-const categories = [
-  "Hành động",
-  "Tình cảm",
-  "Hoạt hình",
-  "Kinh dị",
-  "Hài hước",
-  "Phiêu lưu",
-  "Tâm lý",
-  "Viễn tưởng",
-  "Cổ trang",
-  "Âm nhạc",
-  "Thể thao",
-  "Chiến tranh",
-  "Gia đình",
-  "Tội phạm",
-  "Võ thuật",
-  "Khoa học",
+const types = [
+  { title: "Phim bộ", slug: "phim-bo" },
+  { title: "Phim lẻ", slug: "phim-le" },
+  { title: "Hoạt hình", slug: "hoat-hinh" },
 ];
-const countries = [
-  "Việt Nam",
-  "Mỹ",
-  "Hàn Quốc",
-  "Nhật Bản",
-  "Trung Quốc",
-  "Thái Lan",
-  "Ấn Độ",
-  "Anh",
-  "Pháp",
-  "Úc",
-  "Đài Loan",
-  "Hong Kong",
-];
-const types = ["Phim bộ", "Phim lẻ", "Chiếu rạp"];
 
 export default function MobileMenu() {
+  const [categories, setCategories] = useState<Prop[]>([]);
+    const [countries, setCountries] = useState<Prop[]>([]);
+    
+    useEffect(() => {
+      fetchCategory()
+        .then((data) => setCategories(data))
+        .catch((err) => console.error("Lỗi load thể loại:", err));
+  
+      fetchCountries().then((data) => setCountries(data))
+      .catch((err) => console.error("Lỗi load quốc gia:", err))
+    }, []);
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -70,11 +55,11 @@ export default function MobileMenu() {
             <div className="grid grid-cols-2 gap-2 mt-2">
               {categories.map((cat) => (
                 <Link
-                  key={cat}
-                  href={`/categories/${cat.toLowerCase().replace(/\s+/g, "-")}`}
+                  key={cat.id}
+                  href={`/categories/${cat.slug}`}
                   className="text-sm hover:text-red-400"
                 >
-                  {cat}
+                  {cat.name}
                 </Link>
               ))}
             </div>
@@ -84,11 +69,11 @@ export default function MobileMenu() {
             <div className="grid grid-cols-2 gap-2 mt-2">
               {countries.map((c) => (
                 <Link
-                  key={c}
-                  href={`/countries/${c.toLowerCase().replace(/\s+/g, "-")}`}
+                  key={c.id}
+                  href={`/countries/${c.slug}`}
                   className="text-sm hover:text-red-400"
                 >
-                  {c}
+                  {c.name}
                 </Link>
               ))}
             </div>
@@ -96,13 +81,13 @@ export default function MobileMenu() {
           <div>
             <p className="text-red-400 font-semibold">Phim</p>
             <div className="flex flex-col gap-2 mt-2">
-              {types.map((t) => (
+              {types.map((t, idx) => (
                 <Link
-                  key={t}
-                  href={`/types/${t.toLowerCase().replace(/\s+/g, "-")}`}
+                  key={idx}
+                  href={`/types/${t.slug}`}
                   className="text-sm hover:text-red-400"
                 >
-                  {t}
+                  {t.title}
                 </Link>
               ))}
             </div>
