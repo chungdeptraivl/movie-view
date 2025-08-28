@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Film, XCircle,Loader2 } from "lucide-react";
+import { Search, Film, XCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,6 +17,7 @@ export default function SearchDialog() {
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const delayDebounce = setTimeout(async () => {
@@ -40,7 +41,13 @@ export default function SearchDialog() {
   }, [search]);
 
   return (
-    <Dialog>
+    <Dialog
+      open={open}
+      onOpenChange={(val) => {
+        setOpen(val);
+        if (!val) setSearch(""); 
+      }}
+    >
       <DialogTrigger asChild>
         <Button
           variant="ghost"
@@ -51,14 +58,11 @@ export default function SearchDialog() {
         </Button>
       </DialogTrigger>
 
-      <DialogContent
-        className="sm:max-w-2xl w-full mt-[-15vh] p-4 md:p-6 bg-gray-900 text-white rounded-2xl shadow-2xl border border-gray-700"
-      >
+      <DialogContent className="sm:max-w-2xl w-full mt-[-15vh] p-4 md:p-6 bg-gray-900 text-white rounded-2xl shadow-2xl border border-gray-700">
         <DialogTitle className="text-xl font-semibold mb-4 text-red-400">
           Tìm kiếm phim
         </DialogTitle>
 
-        {/* Input search */}
         <div className="relative md:mb-4">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <Input
@@ -70,10 +74,9 @@ export default function SearchDialog() {
           />
         </div>
 
-        {/* Kết quả tìm kiếm */}
         <div className="mt-2 max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-red-500 scrollbar-track-gray-800 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
           {loading ? (
-             <div className="flex justify-center items-center py-6">
+            <div className="flex justify-center items-center py-6">
               <Loader2 className="w-6 h-6 text-red-500 animate-spin" />
             </div>
           ) : search.trim() === "" ? (
@@ -86,7 +89,10 @@ export default function SearchDialog() {
                 <li key={movie.id}>
                   <Link
                     href={`/movies/${movie.slug}`}
-                    onClick={() => setSearch("")}
+                    onClick={() => {
+                      setSearch("");
+                      setOpen(false); 
+                    }}
                     className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 transition cursor-pointer"
                   >
                     <img
