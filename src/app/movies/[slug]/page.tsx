@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Play, Film, Star, Clock, Share2, Heart, Tv, BadgeInfo, ChevronRight } from 'lucide-react'
+import { Play, Film, Star, Clock, Share2, Heart, Tv, BadgeInfo, ChevronRight, Loader2 } from 'lucide-react'
 import type { EpisodeServer, EpisodeSource, MovieDetail } from '@/services/apiService'
 import { movieDetailService } from '@/services/apiService'
 import { normalizeTrailer } from '@/lib/utils'
@@ -72,11 +72,11 @@ export default function MovieDetailPage() {
             slug: data.slug
         }
     }, [data])
-    
+
     const trailerUrl = useMemo(() => normalizeTrailer(movie?.trailer || ''), [movie?.trailer]);
 
     if (loading) {
-        return <main className="min-h-screen grid place-items-center text-white">Đang tải…</main>
+        return <main className="min-h-screen grid place-items-center text-white"><Loader2 className="h-10 w-10 animate-spin text-red-500" /></main>
     }
     if (error || !movie) {
         return <main className="min-h-screen grid place-items-center text-red-400">Lỗi: {error || 'Không tìm thấy phim'}</main>
@@ -152,12 +152,12 @@ export default function MovieDetailPage() {
                                         <Play className="h-5 w-5" /> Xem trailer
                                     </button>
                                 )}
-                                <Link  href={`/watch/${movie.slug}`} className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/30">
+                                <Link href={`/watch/${movie.slug}`} className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/30">
                                     <Tv className="h-5 w-5" /> Xem ngay
                                 </Link>
                                 <button
                                     onClick={() => setLike((v) => !v)}
-                                    className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold focus:outline-none focus:ring-2 ${like
+                                    className={`cursor-pointer inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold focus:outline-none focus:ring-2 ${like
                                         ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30 focus:ring-rose-400'
                                         : 'bg-white/10 text-white hover:bg-white/15 focus:ring-white/30'
                                         }`}
@@ -176,12 +176,12 @@ export default function MovieDetailPage() {
                         { key: 'overview', label: 'Tổng quan', icon: <BadgeInfo className="h-4 w-4" /> },
                         { key: 'episodes', label: 'Tập', icon: <Tv className="h-4 w-4" /> },
                         { key: 'cast', label: 'Diễn viên', icon: <Film className="h-4 w-4" /> },
-                        { key: 'photos', label: 'Ảnh', icon: <ChevronRight className="h-4 w-4 rotate-90" /> },
+                        // { key: 'photos', label: 'Ảnh', icon: <ChevronRight className="h-4 w-4 rotate-90" /> },
                     ].map((t) => (
                         <button
                             key={t.key}
                             onClick={() => setActiveTab(t.key as any)}
-                            className={`mr-1 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${activeTab === (t.key as any) ? 'bg-white text-black shadow' : 'text-white/80 hover:bg-white/10'
+                            className={`mr-1 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition cursor-pointer ${activeTab === (t.key as any) ? 'bg-white text-black shadow' : 'text-white/80 hover:bg-white/10'
                                 }`}
                         >
                             {t.icon}
@@ -193,16 +193,16 @@ export default function MovieDetailPage() {
                 <div className="mt-6">
                     {activeTab === 'overview' && <Overview overview={movie.overview} stills={movie.stills.slice(0, 6)} />}
                     {activeTab === 'episodes' && data?.episodes && (
-                         <EpisodesPanel
-      slug={String(slug)}
-      servers={data.episodes}
-      onPlay={({ serverIdx, epIdx /*, src*/ }) => {
-        router.push(`/watch/${slug}?server=${serverIdx}&ep=${epIdx}`)
-      }}
-    />
+                        <EpisodesPanel
+                            slug={String(slug)}
+                            servers={data.episodes}
+                            onPlay={({ serverIdx, epIdx}) => {
+                                router.push(`/watch/${slug}?server=${serverIdx}&ep=${epIdx}`)
+                            }}
+                        />
                     )}
                     {activeTab === 'cast' && <CastList cast={movie.cast} />}
-                    {activeTab === 'photos' && <PhotoGrid stills={movie.stills} />}
+                    {/* {activeTab === 'photos' && <PhotoGrid stills={movie.stills} />} */}
                     {activeTab === 'more' && <MoreCarousel items={[]} />}
                 </div>
             </div>
@@ -241,49 +241,126 @@ function EpisodesPanel({
   pageSize = 40,
   onPlay,
 }: {
-  slug: string
-  servers: EpisodeServer[]
-  pageSize?: number
-  onPlay?: (args: { serverIdx: number; epIdx: number; src: EpisodeSource }) => void
+  slug: string;
+  servers: EpisodeServer[];
+  pageSize?: number;
+  onPlay?: (args: { serverIdx: number; epIdx: number; src: EpisodeSource }) => void;
 }) {
-  const [serverIdx, setServerIdx] = useState(0)
-  const [page, setPage] = useState(1)
+  const [serverIdx, setServerIdx] = useState(0);
+  const [page, setPage] = useState(1);
 
-  const currentServer = servers[serverIdx] ?? { server_name: 'Server', server_data: [] }
+  const [perPage, setPerPage] = useState(pageSize);
+  useEffect(() => setPerPage(pageSize), [pageSize]); 
+
+  const currentServer = servers[serverIdx] ?? { server_name: "Server", server_data: [] };
 
   const sortedEpisodes = useMemo(() => {
     const getNum = (s?: string) => {
-      const m = String(s ?? '').match(/\d+/)
-      return m ? parseInt(m[0], 10) : Number.POSITIVE_INFINITY
-    }
-    return [...(currentServer.server_data ?? [])].sort((a, b) => getNum(a.name) - getNum(b.name))
-  }, [currentServer.server_data])
+      const m = String(s ?? "").match(/\d+/);
+      return m ? parseInt(m[0], 10) : Number.POSITIVE_INFINITY;
+    };
+    return [...(currentServer.server_data ?? [])].sort(
+      (a, b) => getNum(a.name) - getNum(b.name)
+    );
+  }, [currentServer.server_data]);
 
-  const start = (page - 1) * pageSize
-  const view = sortedEpisodes.slice(start, start + pageSize)
+  const total = sortedEpisodes.length;
+  const start = (page - 1) * perPage;
+  const end = start + perPage;
+  const view = sortedEpisodes.slice(start, end);
 
-  useEffect(() => { setPage(1) }, [serverIdx])
+  useEffect(() => {
+    setPage(1);
+  }, [serverIdx]);
+
+  const handleIncreasePerPage = () => {
+    setPerPage((n) => n + 40);
+    setPage(1);
+  };
 
   return (
     <div className="rounded-2xl bg-white/5 p-5 ring-1 ring-white/10">
+      <div className="mb-4 flex flex-wrap items-center gap-2 text-sm text-white/80">
+        <span className="mr-2">Server:</span>
+        <select
+          value={serverIdx}
+          onChange={(e) => setServerIdx(Number(e.target.value))}
+          className="bg-white/10 text-white rounded-md px-2 py-1 ring-1 ring-white/10 cursor-pointer"
+        >
+          {servers.map((s, i) => (
+            <option key={i} value={i} className="bg-slate-900">
+              {s.server_name ?? `Server ${i + 1}`}
+            </option>
+          ))}
+        </select>
+
+        <span className="ml-auto" />
+        <span>
+          Hiển thị: <b>{view.length}</b>/<b>{total}</b> • Mỗi trang: <b>{perPage}</b>
+        </span>
+
+        <button
+          onClick={handleIncreasePerPage}
+          className="ml-2 rounded-md bg-white/10 px-3 py-1 ring-1 ring-white/10 hover:bg-white/15 cursor-pointer"
+          title="Tăng thêm 40/t trang"
+        >
+          +40
+        </button>
+
+        {/* Tuỳ chọn: nhanh chọn 40/80/120/All */}
+        {/* <div className="flex gap-1">
+          {[40, 80, 120].map((n) => (
+            <button key={n} onClick={() => { setPerPage(n); setPage(1); }}
+              className={`rounded-md px-2 py-1 ring-1 ring-white/10 ${perPage===n?'bg-emerald-500 text-white':'bg-white/10 hover:bg-white/15'}`}>
+              {n}
+            </button>
+          ))}
+          <button onClick={() => { setPerPage(total || 9999); setPage(1); }}
+            className="rounded-md px-2 py-1 ring-1 ring-white/10 bg-white/10 hover:bg-white/15">
+            All
+          </button>
+        </div> */}
+      </div>
 
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2">
         {view.map((ep, i) => {
-          const epIdx = start + i 
+          const epIdx = start + i;
           return (
             <button
               key={`${servers[serverIdx]?.server_name}-${epIdx}-${ep.name}`}
               onClick={() => onPlay?.({ serverIdx, epIdx, src: ep })}
-              className="h-10 rounded-lg bg-white/10 hover:bg-white/15 text-sm font-semibold ring-1 ring-white/10"
+              className="h-10 rounded-lg bg-white/10 hover:bg-white/15 text-sm font-semibold ring-1 cursor-pointer ring-white/10"
               title={ep.name ?? `Tập ${epIdx + 1}`}
             >
               {ep.name ?? `Tập ${epIdx + 1}`}
             </button>
-          )
+          );
         })}
       </div>
+
+      {total > perPage && (
+        <div className="mt-4 flex items-center justify-center gap-2">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="rounded-md bg-white/10 px-3 py-1 ring-1 ring-white/10 disabled:opacity-50 cursor-pointer"
+          >
+            Trước
+          </button>
+          <span className="text-white/70 text-sm cursor-pointer">
+            Trang {page} / {Math.max(1, Math.ceil(total / perPage))}
+          </span>
+          <button
+            disabled={end >= total}
+            onClick={() => setPage((p) => p + 1)}
+            className="rounded-md bg-white/10 px-3 py-1 ring-1 ring-white/10 disabled:opacity-50 cursor-pointer"
+          >
+            Sau
+          </button>
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
 function Overview({ overview, stills }: { overview: string; stills: string[] }) {

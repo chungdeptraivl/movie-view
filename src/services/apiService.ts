@@ -107,6 +107,26 @@ export class MovieService {
       return [];
     }
   }
+
+  async searchMovies(keyword: string, page = 1, limit = 30) {
+    if (!keyword.trim()) return [];
+
+    const q = `?keyword=${encodeURIComponent(keyword)}&page=${page}&limit=${limit}`;
+    const data = await apiGet<any>(`/tim-kiem${q}`, {
+       baseKey: "phim_v1", 
+    });
+
+    const items = data?.data?.items ?? data?.items ?? [];
+    return items.map((item: any) => ({
+      id: item._id || item.id,
+      name: item.name,
+      slug: item.slug,
+      poster_url: normalizeImage(item.poster_url),
+      thumb_url: normalizeImage(item.thumb_url),
+      year: Number(item.year) || 0,
+      episode_current: String(item.episode_current ?? ""),
+    }));
+  }
 }
 
 export class MovieDetailService {

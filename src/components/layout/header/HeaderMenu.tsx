@@ -12,8 +12,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { data } from "framer-motion/client";
 
-const types = ["Phim bộ", "Phim lẻ", "Chiếu rạp"];
 
+const types = [
+  { title: "Phim bộ", slug: "phim-bo" },
+  { title: "Phim lẻ", slug: "phim-le" },
+  { title: "Hoạt hình", slug: "hoat-hinh" },
+];
 export default function HeaderMenu() {
   const [categories, setCategories] = useState<Prop[]>([]);
   const [countries, setCountries] = useState<Prop[]>([]);
@@ -50,7 +54,7 @@ export default function HeaderMenu() {
               <MenubarItem key={String(cat.id)} asChild>
                 <Link
                   href={`/categories/${cat.slug}`}
-                  className="px-3 py-2 text-sm rounded-md hover:bg-gray-800 hover:text-red-400 transition cursor-pointer"
+                  className="px-3 py-2 text-sm rounded-md hover:bg-gray-800 hover:text-red-400 transition cursor-pointer justify-center"
                 >
                   {cat.name}
                 </Link>
@@ -70,7 +74,7 @@ export default function HeaderMenu() {
               <MenubarItem key={c.id} asChild>
                 <Link
                   href={`/countries/${c.slug}`}
-                  className="px-3 py-2 text-sm rounded-md hover:bg-gray-800 hover:text-red-400 transition cursor-pointer"
+                  className="px-3 py-2 text-sm rounded-md hover:bg-gray-800 hover:text-red-400 transition cursor-pointer justify-center"
                 >
                   {c.name}
                 </Link>
@@ -86,13 +90,13 @@ export default function HeaderMenu() {
         </MenubarTrigger>
         <MenubarContent className="bg-gray-900 text-gray-200 p-4 rounded-lg w-[160px]">
           <div className="grid grid-cols-1 gap-2">
-            {types.map((t) => (
-              <MenubarItem key={t} asChild>
+            {types.map((t , index) => (
+              <MenubarItem key={index} asChild>
                 <Link
-                  href={`/types/${t.toLowerCase().replace(/\s+/g, "-")}`}
+                  href={`/types/${t.slug}`}
                   className="px-3 py-2 text-sm rounded-md hover:bg-gray-800 hover:text-red-400 transition cursor-pointer"
                 >
-                  {t}
+                  {t.title}
                 </Link>
               </MenubarItem>
             ))}

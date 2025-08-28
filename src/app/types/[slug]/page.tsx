@@ -82,7 +82,7 @@ export default function MoviesPage() {
         const run = async () => {
             try {
                 setLoading(true);
-                const res = await apiGet<any>(`/quoc-gia/${slug}?page=${page}&limit=15`, { baseKey: "phim_v1" });
+                const res = await apiGet<any>(`/danh-sach/${slug}?page=${page}&limit=15`, { baseKey: "phim_v1" });
                 const data = res?.data ?? {};
 
                 setCategoryTitle(data.titlePage || slug);
@@ -112,12 +112,12 @@ export default function MoviesPage() {
 
     return (
         <div className="min-h-screen pb-6 bg-gradient-to-b from-slate-950 via-slate-900 to-black text-white">
-            <Breadcrumb title={slug ? `Quốc gia: ${categoryTitle}` : ""} />
+            <Breadcrumb title={slug ? `Thể loại: ${categoryTitle}` : "Movies"} />
 
             <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
                 {error && <div className="mb-4 text-sm text-red-300">{error}</div>}
                 {loading && movies.length === 0 && (
-                    <div className="py-16 text-center text-white/70">Đang tải…</div>
+                    <div className="py-16 text-center text-white/70"><Loader2 className="h-10 w-10 animate-spin text-red-500" /></div>
                 )}
 
                 <section>
@@ -137,7 +137,7 @@ export default function MoviesPage() {
                             className="px-6 py-3 rounded-xl bg-white/10 text-white/90 hover:bg-white/20 ring-1 ring-white/15 disabled:opacity-50 cursor-pointer"
                             disabled={loading || !canLoadMore}
                         >
-                            {loading ? <Loader2 className="h-5 w-5 animate-spin text-red-500" /> : "Tải thêm"}
+                            {loading ? <Loader2 className="h-10 w-10 animate-spin text-red-500" /> : "Tải thêm"}
                         </button>
                     </div>
                 </section>
