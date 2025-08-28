@@ -5,7 +5,7 @@ import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import Hls from 'hls.js'
 import { movieDetailService } from '@/services/apiService'
 import type { EpisodeServer, EpisodeSource, MovieDetail } from '@/services/apiService'
-import { Play, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Play, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 
 export default function WatchPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -104,7 +104,7 @@ export default function WatchPage() {
     embed: currentEp?.link_embed || null,
   }), [currentEp])
 
-  if (loading) return <main className="min-h-screen grid place-items-center text-white">Đang tải…</main>
+  if (loading) return <main className="min-h-screen grid place-items-center text-white"><Loader2 className="h-10 w-10 animate-spin text-red-500" /></main>
   if (error || !detail) return <main className="min-h-screen grid place-items-center text-red-400">Lỗi: {error || 'Không tìm thấy dữ liệu'}</main>
 
   return (

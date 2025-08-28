@@ -3,6 +3,7 @@ import React from "react";
 import { useParams } from "next/navigation";
 import { MovieService } from "@/services/apiService";
 import { apiGet } from "@/services/axiosClient";
+import { Loader2 } from "lucide-react";
 
 type ApiMovie = {
     id: string;
@@ -116,9 +117,8 @@ export default function MoviesPage() {
             <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
                 {error && <div className="mb-4 text-sm text-red-300">{error}</div>}
                 {loading && movies.length === 0 && (
-                    <div className="py-16 text-center text-white/70">Đang tải…</div>
+                    <main className="min-h-screen grid place-items-center text-white"><Loader2 className="h-10 w-10 animate-spin text-red-500" /></main>
                 )}
-
                 <section>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
                         {movies.map((m) => (
@@ -136,7 +136,7 @@ export default function MoviesPage() {
                             className="px-6 py-3 rounded-xl bg-white/10 text-white/90 hover:bg-white/20 ring-1 ring-white/15 disabled:opacity-50 cursor-pointer"
                             disabled={loading || !canLoadMore}
                         >
-                            {loading ? "Đang tải..." : "Tải thêm"}
+                             {loading ? <Loader2 className="h-5 w-5 animate-spin text-red-500" /> : "Tải thêm"}
                         </button>
                     </div>
                 </section>

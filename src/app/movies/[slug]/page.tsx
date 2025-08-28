@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Play, Film, Star, Clock, Share2, Heart, Tv, BadgeInfo, ChevronRight } from 'lucide-react'
+import { Play, Film, Star, Clock, Share2, Heart, Tv, BadgeInfo, ChevronRight, Loader2 } from 'lucide-react'
 import type { EpisodeServer, EpisodeSource, MovieDetail } from '@/services/apiService'
 import { movieDetailService } from '@/services/apiService'
 import { normalizeTrailer } from '@/lib/utils'
@@ -76,7 +76,7 @@ export default function MovieDetailPage() {
     const trailerUrl = useMemo(() => normalizeTrailer(movie?.trailer || ''), [movie?.trailer]);
 
     if (loading) {
-        return <main className="min-h-screen grid place-items-center text-white">Đang tải…</main>
+        return <main className="min-h-screen grid place-items-center text-white"><Loader2 className="h-10 w-10 animate-spin text-red-500" /></main>
     }
     if (error || !movie) {
         return <main className="min-h-screen grid place-items-center text-red-400">Lỗi: {error || 'Không tìm thấy phim'}</main>
