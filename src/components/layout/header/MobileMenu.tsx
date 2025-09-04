@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -10,8 +8,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useEffect, useState } from "react";
-import { fetchCategory, fetchCountries, Prop } from "@/services/hederService";
+import { useMenu } from "@/context/MenuContext";
+import { Menu } from "lucide-react";
+import Link from "next/link";
 
 const types = [
   { title: "Phim bộ", slug: "phim-bo" },
@@ -20,17 +19,8 @@ const types = [
 ];
 
 export default function MobileMenu() {
-  const [categories, setCategories] = useState<Prop[]>([]);
-    const [countries, setCountries] = useState<Prop[]>([]);
-    
-    useEffect(() => {
-      fetchCategory()
-        .then((data) => setCategories(data))
-        .catch((err) => console.error("Lỗi load thể loại:", err));
-  
-      fetchCountries().then((data) => setCountries(data))
-      .catch((err) => console.error("Lỗi load quốc gia:", err))
-    }, []);
+  const { categories, countries, loading } = useMenu();
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -46,7 +36,7 @@ export default function MobileMenu() {
         <SheetHeader className="hidden">
           <SheetTitle></SheetTitle>
         </SheetHeader>
-        <nav className="flex flex-col space-y-4">
+        <nav className="flex flex-col space-y-4 overflow-y-auto hidden-scrollbar">
           <Link href="/" className="hover:text-red-400">
             Trang chủ
           </Link>

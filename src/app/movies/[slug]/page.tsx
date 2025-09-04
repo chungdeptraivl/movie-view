@@ -1,34 +1,21 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
-import {
-  Play,
-  Film,
-  Star,
-  Clock,
-  Share2,
-  Heart,
-  Tv,
-  BadgeInfo,
-  ChevronRight,
-  Loader2,
-} from "lucide-react";
+import { normalizeTrailer } from "@/lib/utils";
 import type {
   EpisodeServer,
   EpisodeSource,
   MovieDetail,
 } from "@/services/apiService";
 import { movieDetailService } from "@/services/apiService";
-import { normalizeTrailer } from "@/lib/utils";
+import { BadgeInfo, Clock, Film, Loader2, Play, Star, Tv } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 export default function MovieDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const [activeTab, setActiveTab] = useState<
     "overview" | "cast" | "photos" | "more" | "episodes"
   >("overview");
-  const [like, setLike] = useState(false);
   const [trailerOpen, setTrailerOpen] = useState(false);
   const [data, setData] = useState<MovieDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,7 +68,12 @@ export default function MovieDetailPage() {
       duration: data.time ?? "",
       quality: data.quality ?? "HD",
       age: data.lang ?? "",
-      genres: (data.category ?? []).map((c) => c.name).filter(Boolean),
+      genres: (data.category ?? [])
+        .map((c) => ({
+          name: c.name,
+          slug: c.slug,
+        }))
+        .filter(Boolean),
       overview: data.content ?? "",
       backdrop: data.thumb_url,
       poster: data.poster_url,
@@ -124,7 +116,7 @@ export default function MovieDetailPage() {
         <img
           src={movie.backdrop}
           alt="Backdrop"
-          className="h-[60vh] w-full object-cover"
+          className="w-full aspect-video md:aspect-[21/9] lg:aspect-[21/9] min-h-[400px] sm:min-h-[500px] md:min-h-[600px] object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0b0e13] via-[#0b0e13]/60 to-transparent" />
         <div className="container mx-auto px-4">
@@ -183,12 +175,13 @@ export default function MovieDetailPage() {
                     <span>•</span>
                     <span className="inline-flex flex-wrap gap-2">
                       {movie.genres.map((g) => (
-                        <span
-                          key={g}
-                          className="rounded-full bg-white/5 px-3 py-1 text-xs ring-1 ring-white/10"
+                        <Link
+                          key={g.slug}
+                          href={`/categories/${g.slug}`}
+                          className="rounded-full bg-white/5 px-3 py-1 text-xs ring-1 ring-white/10 hover:bg-white/10"
                         >
-                          {g}
-                        </span>
+                          {g.name}
+                        </Link>
                       ))}
                     </span>
                   </>
@@ -199,18 +192,18 @@ export default function MovieDetailPage() {
                 {movie.trailer && (
                   <button
                     onClick={() => setTrailerOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/30 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/30 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   >
                     <Play className="h-5 w-5" /> Xem trailer
                   </button>
                 )}
                 <Link
                   href={`/watch/${movie.slug}`}
-                  className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/30"
+                  className="inline-flex items-center gap-2 rounded-xl bg-red-500 px-5 py-3 text-sm font-semibold text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-white/30"
                 >
                   <Tv className="h-5 w-5" /> Xem ngay
                 </Link>
-                <button
+                {/* <button
                   onClick={() => setLike((v) => !v)}
                   className={`cursor-pointer inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold focus:outline-none focus:ring-2 ${
                     like
@@ -220,7 +213,7 @@ export default function MovieDetailPage() {
                 >
                   <Heart className="h-5 w-5" />{" "}
                   {like ? "Đã thích" : "Yêu thích"}
-                </button>
+                </button> */}
               </div>
             </div>
           </div>
@@ -228,7 +221,7 @@ export default function MovieDetailPage() {
       </section>
 
       <div className="container mx-auto px-4 pt-8">
-        <div className="no-scrollbar flex overflow-x-auto rounded-xl bg-white/5 p-1 ring-1 ring-white/10">
+        <div className="no-scrollbar flex overflow-x-auto rounded-xl bg-white/5 p-1 ring-1 ring-white/10 gap-2">
           {[
             {
               key: "overview",
@@ -463,7 +456,7 @@ function Overview({
       </div>
 
       <div className="rounded-2xl bg-white/5 p-3 ring-1 ring-white/10">
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {stills.map((s, i) => (
             <div key={i} className="overflow-hidden rounded-xl">
               <img

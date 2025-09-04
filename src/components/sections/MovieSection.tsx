@@ -39,10 +39,10 @@ const MovieSection = ({ title, movies, slug, api }: MovieSectionProps) => {
   return (
     <div className="mb-12">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl sm:text-3xl font-bold text-red-500">{title}</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white">{title}</h2>
         <Link
           href={href}
-          className="text-sm sm:text-base text-red-500 hover:underline"
+          className="text-sm sm:text-base text-red-500 hover:text-red-600 transition-colors duration-300"
         >
           Xem thêm
         </Link>
@@ -55,25 +55,25 @@ const MovieSection = ({ title, movies, slug, api }: MovieSectionProps) => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="relative group cursor-pointer rounded-lg overflow-hidden"
+              className="relative cursor-pointer rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition"
             >
               <img
                 src={movie.thumb_url || movie.poster_url}
                 alt={movie.name}
-                className="w-full aspect-[0.7] object-cover transition-transform duration-300 group-hover:scale-110"
+                className="w-full aspect-[0.7] object-cover transition-transform duration-300 hover:scale-110"
               />
 
               {movie.episode_current && (
-                <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded">
+                <span className="absolute top-2 left-2 bg-black/85 text-white text-xs font-bold px-2 py-1 rounded-md shadow-md">
                   {movie.episode_current}
                 </span>
               )}
 
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center text-center p-2">
-                <h3 className="text-white font-semibold text-sm sm:text-base line-clamp-2 mb-2">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-3">
+                <h3 className="text-white font-bold text-sm sm:text-base line-clamp-2 mb-2">
                   {movie.name}
                 </h3>
-                <button className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-xl text-sm font-bold transition cursor-pointer">
+                <button className="flex items-center justify-center gap-2 cursor-pointer bg-red-500 hover:bg-red-6  00 text-white px-4 py-2 rounded-lg text-sm font-bold transition transform hover:scale-105">
                   <Play size={16} /> Xem ngay
                 </button>
               </div>
@@ -85,9 +85,10 @@ const MovieSection = ({ title, movies, slug, api }: MovieSectionProps) => {
   );
 };
 
-
 export default function MovieCategories() {
-  const [sections, setSections] = useState<{ title: string; slug: string; movies: Movie[] , api: string }[]>([]);
+  const [sections, setSections] = useState<
+    { title: string; slug: string; movies: Movie[]; api: string }[]
+  >([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -106,7 +107,13 @@ export default function MovieCategories() {
   return (
     <div className="px-4 sm:px-8 py-8">
       {sections.map((sec) => (
-        <MovieSection key={sec.title} title={sec.title} movies={sec.movies} slug={sec.slug} api={sec.api} />
+        <MovieSection
+          key={sec.title}
+          title={sec.title}
+          movies={sec.movies}
+          slug={sec.slug}
+          api={sec.api}
+        />
       ))}
     </div>
   );

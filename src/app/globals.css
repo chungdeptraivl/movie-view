@@ -128,15 +128,26 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #1f1f1f; /* track tối */
+  background: #1f1f1f;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ef4444; /* đỏ giống theme */
+  background: #ef4444;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #dc2626; /* hover đậm hơn */
+  background: #dc2626;
+}
+
+.hidden-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }

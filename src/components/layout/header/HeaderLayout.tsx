@@ -7,7 +7,7 @@ import MobileMenu from "./MobileMenu";
 
 export default function HeaderLayout() {
   return (
-    <header className="w-full bg-black text-white sticky top-0 z-50 shadow-lg">
+    <header className="w-full bg-black text-white relative top-0 z-50 shadow-lg">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
         <Link
           href="/"

@@ -7,34 +7,17 @@ import {
   MenubarMenu,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import { fetchCategory, fetchCountries, Prop } from "@/services/hederService";
+import { useMenu } from "@/context/MenuContext";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { data } from "framer-motion/client";
-
 
 const types = [
   { title: "Phim bộ", slug: "phim-bo" },
   { title: "Phim lẻ", slug: "phim-le" },
   { title: "Hoạt hình", slug: "hoat-hinh" },
 ];
+
 export default function HeaderMenu() {
-  const [categories, setCategories] = useState<Prop[]>([]);
-  const [countries, setCountries] = useState<Prop[]>([]);
-
-  useEffect(() => {
-    fetchCategory()
-      .then((data) => {
-        setCategories(data);
-      })
-      .catch((err) => console.error("Lỗi load thể loại:", err));
-
-    fetchCountries()
-      .then((data) => {
-        setCountries(data);
-      })
-      .catch((err) => console.error("Lỗi load quốc gia:", err));
-  }, []);
+  const { categories, countries } = useMenu();
 
   return (
     <Menubar className="bg-transparent border-0 text-gray-200 space-x-6">
@@ -90,7 +73,7 @@ export default function HeaderMenu() {
         </MenubarTrigger>
         <MenubarContent className="bg-gray-900 text-gray-200 p-4 rounded-lg w-[160px]">
           <div className="grid grid-cols-1 gap-2">
-            {types.map((t , index) => (
+            {types.map((t, index) => (
               <MenubarItem key={index} asChild>
                 <Link
                   href={`/types/${t.slug}`}

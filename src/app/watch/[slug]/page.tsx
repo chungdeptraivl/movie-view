@@ -170,7 +170,7 @@ export default function WatchPage() {
 
         {/* Episodes */}
         <div className="rounded-2xl bg-white/5 p-3 ring-1 ring-white/10">
-          <div className="mb-2 flex items-center justify-between">
+          <div className="mb-6 flex items-center justify-between">
             <h3 className="font-semibold">Danh sách tập</h3>
             <div className="flex items-center gap-2">
               {/* nút tăng số lượng hiển thị */}
@@ -253,7 +253,7 @@ export default function WatchPage() {
                   </button>
                 </div>
               )}
-              <p className="mt-2 text-center text-xs text-white/60">
+              <p className="mt-5 text-center text-xs text-white/60">
                 Đang hiển thị {Math.min(visible, eps.length)}/{eps.length} tập
               </p>
             </>

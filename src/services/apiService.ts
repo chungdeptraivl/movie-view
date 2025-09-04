@@ -44,6 +44,7 @@ export interface MovieDetail {
   actor?: string[];
   director?: string[];
   episodes?: EpisodeServer[];
+  movie?: any
 }
 
 /** Utils */

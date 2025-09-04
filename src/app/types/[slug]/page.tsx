@@ -1,9 +1,27 @@
 "use client";
 import React from "react";
 import { useParams } from "next/navigation";
-import { MovieService } from "@/services/apiService";
 import { apiGet } from "@/services/axiosClient";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
+import { useMenu } from "@/context/MenuContext";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 type ApiMovie = {
   id: string;
@@ -42,27 +60,27 @@ function MovieCard({ movie }: { movie: ApiMovie }) {
 
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80" />
 
+      <div className="absolute top-2 left-2 flex items-center gap-2">
+        <span className="bg-black/60 text-white/80 text-xs px-2 py-0.5 rounded-md">
+          {movie.year || "—"}
+        </span>
+        {movie.episode_current && (
+          <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-md shadow-md">
+            {movie.episode_current}
+          </span>
+        )}
+      </div>
+
       <div className="absolute inset-x-0 bottom-0 p-4">
-        <h3 className="text-white font-semibold text-base line-clamp-1">
+        <h3 className="text-white font-semibold text-base line-clamp-2">
           {movie.name}
         </h3>
-        <div className="mt-1 flex items-center gap-2 text-white/70 text-xs">
-          <span>{movie.year || "—"}</span>
-          <span>•</span>
-          <span className="truncate">{movie.episode_current || ""}</span>
-        </div>
         <div className="mt-3">
           <a
             href={`/movies/${movie.slug}`}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 text-sm font-medium text-white shadow transition hover:brightness-110"
+            className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white shadow transition hover:bg-red-700"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              className="opacity-90"
-            >
+            <svg width="16" height="16" fill="currentColor">
               <path d="M4 3l9 5-9 5V3z" />
             </svg>
             Xem ngay
@@ -76,16 +94,28 @@ function MovieCard({ movie }: { movie: ApiMovie }) {
 export default function MoviesPage() {
   const params = useParams<{ slug: string }>();
   const slug = Array.isArray(params?.slug) ? params.slug[0] : params?.slug;
+
   const [movies, setMovies] = React.useState<ApiMovie[]>([]);
   const [page, setPage] = React.useState(1);
+  const [totalPages, setTotalPages] = React.useState(1);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [categoryTitle, setCategoryTitle] = React.useState<string>("Movies");
+  const [categoryTitle, setCategoryTitle] = React.useState("Movies");
+
+  // bộ lọc
+  const [category, setCategory] = React.useState("");
+  const [country, setCountry] = React.useState("");
+  const [lang, setLang] = React.useState("");
+  const [year, setYear] = React.useState("");
+
+  const { categories, countries } = useMenu();
+
+  // reset khi đổi slug hoặc filter
   React.useEffect(() => {
     setMovies([]);
     setPage(1);
     setError(null);
-  }, [slug]);
+  }, [slug, category, country, lang, year]);
 
   React.useEffect(() => {
     if (!slug) return;
@@ -93,12 +123,17 @@ export default function MoviesPage() {
       try {
         setLoading(true);
         const res = await apiGet<any>(
-          `/danh-sach/${slug}?page=${page}&limit=15`,
+          `/danh-sach/${slug}?page=${page}&limit=15` +
+            (category ? `&category=${category}` : "") +
+            (country ? `&country=${country}` : "") +
+            (lang ? `&sort_lang=${lang}` : "") +
+            (year ? `&year=${year}` : ""),
           { baseKey: "phim_v1" }
         );
         const data = res?.data ?? {};
 
         setCategoryTitle(data.titlePage || slug);
+        setTotalPages(data?.params?.pagination?.totalPages || page);
 
         const items =
           data.items?.map((item: any) => ({
@@ -115,7 +150,7 @@ export default function MoviesPage() {
             episode_current: item.episode_current || "",
           })) ?? [];
 
-        setMovies((prev) => (page === 1 ? items : [...prev, ...items]));
+        setMovies(items);
       } catch (e: any) {
         setError(e?.message ?? "Load thất bại");
       } finally {
@@ -124,22 +159,128 @@ export default function MoviesPage() {
     };
 
     run();
-  }, [slug, page]);
-
-  const canLoadMore = movies.length > 0 && !loading;
+  }, [slug, page, category, country, lang, year]);
 
   return (
-    <div className="min-h-screen pb-6 bg-gradient-to-b from-slate-950 via-slate-900 to-black text-white">
-      <Breadcrumb title={slug ? `Thể loại: ${categoryTitle}` : "Movies"} />
+    <div className="min-h-screen pb-6 bg-black text-white">
+      <Breadcrumb title={slug ? `Danh sách: ${categoryTitle}` : "Movies"} />
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+        {/* Filter bar */}
+        <div className="flex flex-wrap gap-4 mb-6">
+          {/* Category */}
+          <div className="relative">
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="w-[200px] bg-gray-900 text-white">
+                <SelectValue placeholder="Thể loại" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-900 text-white">
+                {categories.map((c) => (
+                  <SelectItem key={c.slug} value={c.slug}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {category && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-1/2 -translate-y-1/2 right-2 text-red-500 bg-white rounded-full w-5 h-5"
+                onClick={() => setCategory("")}
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            )}
+          </div>
+
+          {/* Country */}
+          <div className="relative">
+            <Select value={country} onValueChange={setCountry}>
+              <SelectTrigger className="w-[200px] bg-gray-900 text-white">
+                <SelectValue placeholder="Quốc gia" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-900 text-white max-h-60 overflow-y-auto">
+                {countries.map((c) => (
+                  <SelectItem key={c.slug} value={c.slug}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {country && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-1/2 -translate-y-1/2 right-2 text-red-500 bg-white rounded-full w-5 h-5"
+                onClick={() => setCountry("")}
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            )}
+          </div>
+
+          {/* Subtitle / Language */}
+          <div className="relative">
+            <Select value={lang} onValueChange={setLang}>
+              <SelectTrigger className="w-[200px] bg-gray-900 text-white">
+                <SelectValue placeholder="Phụ đề" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-900 text-white">
+                <SelectItem value="vietsub">Vietsub</SelectItem>
+                <SelectItem value="thuyet-minh">Thuyết minh</SelectItem>
+                <SelectItem value="long-tieng">Lồng tiếng</SelectItem>
+              </SelectContent>
+            </Select>
+            {lang && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-1/2 -translate-y-1/2 right-2 text-red-500 bg-white rounded-full w-5 h-5"
+                onClick={() => setLang("")}
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            )}
+          </div>
+
+          {/* Year */}
+          <div className="relative">
+            <Select value={year} onValueChange={setYear}>
+              <SelectTrigger className="w-[200px] bg-gray-900 text-white">
+                <SelectValue placeholder="Năm phát hành" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-900 text-white max-h-60 overflow-y-auto">
+                {Array.from(
+                  { length: 2025 - 1970 + 1 },
+                  (_, i) => 2025 - i
+                ).map((y) => (
+                  <SelectItem key={y} value={String(y)}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {year && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-1/2 -translate-y-1/2 right-2 text-red-500 bg-white rounded-full w-5 h-5"
+                onClick={() => setYear("")}
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Movies */}
         {error && <div className="mb-4 text-sm text-red-300">{error}</div>}
         {loading && movies.length === 0 && (
           <div className="py-16 text-center text-white/70">
             <Loader2 className="h-10 w-10 animate-spin text-red-500" />
           </div>
         )}
-
         <section>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
             {movies.map((m) => (
@@ -153,19 +294,57 @@ export default function MoviesPage() {
             </div>
           )}
 
-          <div className="mt-10 flex justify-center">
-            <button
-              onClick={() => setPage((p) => p + 1)}
-              className="px-6 py-3 rounded-xl bg-white/10 text-white/90 hover:bg-white/20 ring-1 ring-white/15 disabled:opacity-50 cursor-pointer"
-              disabled={loading || !canLoadMore}
-            >
-              {loading ? (
-                <Loader2 className="h-10 w-10 animate-spin text-red-500" />
-              ) : (
-                "Tải thêm"
-              )}
-            </button>
-          </div>
+          {/* Pagination */}
+          {movies.length > 0 && (
+            <div className="mt-10 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      className="text-red-500 hover:bg-red-600 hover:text-white"
+                    />
+                  </PaginationItem>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .slice(0, 5)
+                    .map((p) => (
+                      <PaginationItem key={p}>
+                        <PaginationLink
+                          href="#"
+                          onClick={() => setPage(p)}
+                          isActive={p === page}
+                          className={
+                            p === page
+                              ? "bg-red-600 text-white border-none"
+                              : "text-red-500 hover:bg-red-600 hover:text-white"
+                          }
+                        >
+                          {p}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+
+                  {totalPages > 5 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={() =>
+                        setPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      className="text-red-500 hover:bg-red-600 hover:text-white"
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </section>
       </main>
     </div>
