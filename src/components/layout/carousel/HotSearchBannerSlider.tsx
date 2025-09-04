@@ -50,7 +50,7 @@ export default function HotSearchBannerSlider() {
     const fetchMovies = async () => {
       try {
         const res = await apiGet<any>(
-          "/quoc-gia/han-quoc?page=1&limit=6",
+          "/quoc-gia/au-my?page=1&limit=6",
           { baseKey: "phim_v1" }
         );
         const items = res?.data?.items ?? [];
