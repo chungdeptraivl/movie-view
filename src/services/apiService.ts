@@ -80,13 +80,13 @@ function normalizeEpisodeServer(sv: any): EpisodeServer {
     server_name: sv?.server_name ?? sv?.name ?? "Server",
     server_data: Array.isArray(sv?.server_data)
       ? sv.server_data.map(
-          (ep: any): EpisodeSource => ({
-            name: ep?.name ?? ep?.episode ?? "Tập",
-            filename: ep?.filename ?? null,
-            link_embed: ep?.link_embed ?? null,
-            link_m3u8: ep?.link_m3u8 ?? ep?.link_m3U8 ?? null,
-          })
-        )
+        (ep: any): EpisodeSource => ({
+          name: ep?.name ?? ep?.episode ?? "Tập",
+          filename: ep?.filename ?? null,
+          link_embed: ep?.link_embed ?? null,
+          link_m3u8: ep?.link_m3u8 ?? ep?.link_m3U8 ?? null,
+        })
+      )
       : [],
   };
 }
@@ -100,7 +100,11 @@ export class MovieService {
   ): Promise<Movie[]> {
     try {
       const q = `?page=${page}&limit=${limit}`;
-      const data = await apiGet<any>(`${apiPath}${q}`, { baseKey: "phim_v1" });
+      const isNewest = apiPath.includes("phim-moi-cap-nhat");
+      const data = await apiGet<any>(`${apiPath}${q}`, {
+        baseKey: isNewest ? "phim_root" : "phim_v1",  
+        fallbackBases: isNewest ? undefined : ["phim_root"], 
+      });
       const items: any[] = data?.data?.items ?? data?.items ?? [];
       return items.map(normalizeMovie);
     } catch (err) {
@@ -114,7 +118,7 @@ export class MovieService {
 
     const q = `?keyword=${encodeURIComponent(keyword)}&page=${page}&limit=${limit}`;
     const data = await apiGet<any>(`/tim-kiem${q}`, {
-       baseKey: "phim_v1", 
+      baseKey: "phim_v1",
     });
 
     const items = data?.data?.items ?? data?.items ?? [];

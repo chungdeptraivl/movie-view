@@ -7,6 +7,7 @@ import Link from "next/link";
 import { movieService } from "@/services/apiService";
 
 const sectionsConfig = [
+  { title: "Phim mới cập nhật", slug: "phim-moi-cap-nhat", api: "/danh-sach/phim-moi-cap-nhat-v2" },
   { title: "Phim bộ", slug: "phim-bo", api: "/danh-sach/phim-bo" },
   { title: "Phim lẻ", slug: "phim-le", api: "/danh-sach/phim-le" },
   { title: "Phim hoạt hình", slug: "hoat-hinh", api: "/danh-sach/hoat-hinh" },

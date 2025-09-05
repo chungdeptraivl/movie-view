@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -37,48 +38,56 @@ export default function MobileMenu() {
           <SheetTitle></SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col space-y-4 overflow-y-auto hidden-scrollbar">
-          <Link href="/" className="hover:text-red-400">
-            Trang chủ
-          </Link>
+          <SheetClose asChild>
+            <Link href="/" className="hover:text-red-400">
+              Trang chủ
+            </Link>
+          </SheetClose>
+
           <div>
             <p className="text-red-400 font-semibold">Thể loại</p>
             <div className="grid grid-cols-2 gap-2 mt-2">
               {categories.map((cat) => (
-                <Link
-                  key={cat.id}
-                  href={`/categories/${cat.slug}`}
-                  className="text-sm hover:text-red-400"
-                >
-                  {cat.name}
-                </Link>
+                <SheetClose asChild key={cat.id}>
+                  <Link
+                    href={`/categories/${cat.slug}`}
+                    className="text-sm hover:text-red-400"
+                  >
+                    {cat.name}
+                  </Link>
+                </SheetClose>
               ))}
             </div>
           </div>
+
           <div>
             <p className="text-red-400 font-semibold">Quốc gia</p>
             <div className="grid grid-cols-2 gap-2 mt-2">
               {countries.map((c) => (
-                <Link
-                  key={c.id}
-                  href={`/countries/${c.slug}`}
-                  className="text-sm hover:text-red-400"
-                >
-                  {c.name}
-                </Link>
+                <SheetClose asChild key={c.id}>
+                  <Link
+                    href={`/countries/${c.slug}`}
+                    className="text-sm hover:text-red-400"
+                  >
+                    {c.name}
+                  </Link>
+                </SheetClose>
               ))}
             </div>
           </div>
+
           <div>
             <p className="text-red-400 font-semibold">Phim</p>
             <div className="flex flex-col gap-2 mt-2">
               {types.map((t, idx) => (
-                <Link
-                  key={idx}
-                  href={`/types/${t.slug}`}
-                  className="text-sm hover:text-red-400"
-                >
-                  {t.title}
-                </Link>
+                <SheetClose asChild key={idx}>
+                  <Link
+                    href={`/types/${t.slug}`}
+                    className="text-sm hover:text-red-400"
+                  >
+                    {t.title}
+                  </Link>
+                </SheetClose>
               ))}
             </div>
           </div>

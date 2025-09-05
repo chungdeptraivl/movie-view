@@ -63,7 +63,7 @@ export default function HeroBannerSlider() {
             const detailRes = await movieDetailService.getMovieDetail(
               String(item.slug)
             );
-            console.log("detailRes", detailRes);
+            // console.log("detailRes", detailRes);
 
             const movie = detailRes;
             if (!movie) return null;
@@ -215,10 +215,10 @@ export default function HeroBannerSlider() {
               <span className="font-semibold text-red-400">Quốc gia:</span>{" "}
               {activeMovie.tags.join(", ")}
             </p>
-            <p className="line-clamp-2">
+            {/* <p className="line-clamp-2">
               <span className="font-semibold text-red-400">Diễn viên:</span>{" "}
               {activeMovie.starring.join(", ")}
-            </p>
+            </p> */}
           </motion.div>
 
           <motion.div variants={itemVariants}>

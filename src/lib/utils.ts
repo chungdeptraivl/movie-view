@@ -97,3 +97,34 @@ export async function getAllMovies(): Promise<Movie[]> {
     ? data.items
     : [];
 }
+
+
+export const sanitizeSlug = (slug: string) => {
+  if (slug === "phim-moi-cap-nhat" || slug.startsWith("phim-moi-cap-nhat")) {
+    return "phim-moi-cap-nhat"; // force về slug chuẩn
+  }
+  return slug;
+};
+
+export const pickBaseKey = (slug: string) => {
+  return slug === "phim-moi-cap-nhat" ? "phim_root" : "phim_v1";
+};
+
+
+
+export function getListTitle(slug: string, categoryTitle?: string) {
+  if (categoryTitle) return `Danh sách: ${categoryTitle}`;
+
+  const slugMap: Record<string, string> = {
+    "phim-moi-cap-nhat": "Phim mới cập nhật",
+    "phim-le": "Phim lẻ",
+    "phim-bo": "Phim bộ",
+    "hoat-hinh": "Hoạt hình",
+    "tv-shows": "TV Shows",
+  };
+  const key = slug?.toLowerCase().replace(/^\/+|\/+$/g, "") || "";
+  const fallback = slugMap[key] || key.replace(/-/g, " ");
+  const pretty = fallback.charAt(0).toUpperCase() + fallback.slice(1);
+  return `Danh sách: ${pretty}`;
+}
+

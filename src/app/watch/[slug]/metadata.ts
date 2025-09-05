@@ -17,11 +17,16 @@ const stripHtml = (html?: string) =>
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
-  const slug = params.slug;
+  const { slug } = await params;
+  const sp = await searchParams;
 
+  const epParam = Array.isArray(sp?.ep) ? sp.ep[0] : sp?.ep;
+  const epName = epParam ? ` - Tập ${epParam}` : "";
 
   let payload: any = {};
   let errored = false;
@@ -37,47 +42,43 @@ export async function generateMetadata({
   const seo = payload?.seoOnPage ?? {};
   const mv = payload?.movie ?? payload ?? {};
 
-  const baseTitle =
-    seo.titleHead ||
-    mv?.name ||
-    "Rổ Phim - Xem Phim Online HD";
+  const baseTitle = seo.titleHead || mv?.name || "Xem phim online miễn phí";
+  const title = `Xem phim ${mv?.name || baseTitle}${epName}`;
 
   const description =
     seo.descriptionHead ||
     stripHtml(mv?.content) ||
-    "Xem phim online miễn phí, chất lượng HD, cập nhật nhanh.";
+    `Xem phim ${mv?.name || "HD"} online miễn phí, chất lượng cao.`;
 
   const ogImages: string[] = (seo.og_image ?? [])
     .map(toAbsolute)
     .filter(Boolean) as string[];
 
   const poster = toAbsolute(mv?.poster_url);
-  const thumb  = toAbsolute(mv?.thumb_url);
+  const thumb = toAbsolute(mv?.thumb_url);
 
   const images = (ogImages.length ? ogImages : [poster, thumb].filter(Boolean))
     .slice(0, 3) as string[] | undefined;
 
-  const canonical = `/movies/${slug}`;
-
-  const noindex = errored || !mv?.name;
+  const canonical = `/watch/${slug}${epParam ? `?ep=${epParam}` : ""}`;
 
   return {
-    title: baseTitle,
+    title,
     description,
     alternates: { canonical },
-    robots: noindex
-      ? { index: false, follow: true, googleBot: { index: false, follow: true } }
+    robots: errored
+      ? { index: false, follow: true }
       : { index: true, follow: true },
     openGraph: {
-      type: (seo.og_type as any) || "video.movie",
+      type: "video.episode",
       url: canonical,
-      title: baseTitle,
+      title,
       description,
       images,
     },
     twitter: {
       card: "summary_large_image",
-      title: baseTitle,
+      title,
       description,
       images,
     },
