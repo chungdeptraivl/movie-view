@@ -8,12 +8,11 @@ import type {
 import { movieDetailService } from "@/services/apiService";
 import { BadgeInfo, Clock, Film, Loader2, Play, Star, Tv } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 
-export default function MovieDetailPage() {
-  const { slug } = useParams<{ slug: string }>();
+export default function MovieDetailPage({ slug }: { slug: string }) {
   const [activeTab, setActiveTab] = useState<
     "overview" | "cast" | "photos" | "more" | "episodes"
   >("overview");

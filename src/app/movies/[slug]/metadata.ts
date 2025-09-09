@@ -18,13 +18,14 @@ const stripHtml = (html?: string) =>
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const slug = params.slug;
-
+  // ✅ Phải await params trong Next.js 15
+  const { slug } = await params;
 
   let payload: any = {};
   let errored = false;
+
   try {
     const res = await apiGet<any>(`/phim/${encodeURIComponent(slug)}`, {
       baseKey: "phim_root",
@@ -38,9 +39,7 @@ export async function generateMetadata({
   const mv = payload?.movie ?? payload ?? {};
 
   const baseTitle =
-    seo.titleHead ||
-    mv?.name ||
-    "Rổ Phim - Xem Phim Online HD";
+    seo.titleHead || mv?.name || "Rổ Phim - Xem Phim Online HD";
 
   const description =
     seo.descriptionHead ||
@@ -52,13 +51,13 @@ export async function generateMetadata({
     .filter(Boolean) as string[];
 
   const poster = toAbsolute(mv?.poster_url);
-  const thumb  = toAbsolute(mv?.thumb_url);
+  const thumb = toAbsolute(mv?.thumb_url);
 
-  const images = (ogImages.length ? ogImages : [poster, thumb].filter(Boolean))
-    .slice(0, 3) as string[] | undefined;
+  const images = (
+    ogImages.length ? ogImages : [poster, thumb].filter(Boolean)
+  ).slice(0, 3) as string[] | undefined;
 
   const canonical = `/movies/${slug}`;
-
   const noindex = errored || !mv?.name;
 
   return {
@@ -66,7 +65,11 @@ export async function generateMetadata({
     description,
     alternates: { canonical },
     robots: noindex
-      ? { index: false, follow: true, googleBot: { index: false, follow: true } }
+      ? {
+          index: false,
+          follow: true,
+          googleBot: { index: false, follow: true },
+        }
       : { index: true, follow: true },
     openGraph: {
       type: (seo.og_type as any) || "video.movie",
