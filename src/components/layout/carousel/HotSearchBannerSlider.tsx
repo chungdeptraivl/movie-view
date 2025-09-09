@@ -110,7 +110,7 @@ export default function HotSearchBannerSlider() {
       <div className="absolute inset-0 block 2xl:hidden">
         <Swiper
           modules={[Autoplay]}
-          autoplay={{ delay: 5000, disableOnInteraction: false }}
+          autoplay={{ delay: 10000, disableOnInteraction: false }}
           loop
           onSlideChange={(swiper) => setActiveMovie(movies[swiper.realIndex])}
           className="w-full h-full"
@@ -158,7 +158,7 @@ export default function HotSearchBannerSlider() {
             direction="vertical"
             loop
             modules={[Autoplay]}
-            autoplay={{ delay: 5000, disableOnInteraction: false }}
+            autoplay={{ delay: 10000, disableOnInteraction: false }}
             onSlideChange={(swiper) => setActiveMovie(movies[swiper.realIndex])}
             className="h-fit"
           >

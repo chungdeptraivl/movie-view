@@ -117,7 +117,7 @@ export default function HeroBannerSlider() {
       <div className="absolute inset-0 block 2xl:hidden">
         <Swiper
           modules={[Autoplay]}
-          autoplay={{ delay: 500000, disableOnInteraction: false }}
+          autoplay={{ delay: 10000, disableOnInteraction: false }}
           loop
           onSlideChange={(swiper) => setActiveMovie(movies[swiper.realIndex])}
           className="h-full"
@@ -230,7 +230,7 @@ export default function HeroBannerSlider() {
             spaceBetween={20}
             loop
             modules={[Navigation, Autoplay]}
-            autoplay={{ delay: 500000, disableOnInteraction: false }}
+            autoplay={{ delay: 10000, disableOnInteraction: false }}
             navigation={{ prevEl: ".custom-prev", nextEl: ".custom-next" }}
             onSlideChange={(swiper) => setActiveMovie(movies[swiper.realIndex])}
           >
