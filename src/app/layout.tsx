@@ -20,11 +20,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Rổ Phim - Xem Phim Online HD, Phim Mới Cập Nhật Nhanh",
-    template: "%s | Rổ Phim",
+    default: "Phim ngay - Xem Phim Online HD, Phim Mới Cập Nhật Nhanh",
+    template: "%s | Phim ngay",
   },
   description:
-    "Rổ Phim - Website xem phim online miễn phí, chất lượng HD, cập nhật phim mới nhất nhanh chóng. Thưởng thức kho phim đa dạng từ hành động, tình cảm đến hoạt hình.",
+    "Phim ngay - Website xem phim online miễn phí, chất lượng HD, cập nhật phim mới nhất nhanh chóng. Thưởng thức kho phim đa dạng từ hành động, tình cảm đến hoạt hình.",
   alternates: {
     canonical: "/",
     languages: { "vi-VN": "/" },
@@ -44,18 +44,18 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: SITE_URL,
-    siteName: "Rổ Phim",
-    title: "Rổ Phim - Xem Phim Online HD, Phim Mới Cập Nhật Nhanh",
+    siteName: "Phim ngay",
+    title: "Phim ngay - Xem Phim Online HD, Phim Mới Cập Nhật Nhanh",
     description:
       "Xem phim online miễn phí, HD, cập nhật nhanh. Kho phim đa dạng: hành động, tình cảm, hoạt hình...",
     locale: "vi_VN",
     images: [
-      { url: "/og/og-home.jpg", width: 1200, height: 630, alt: "Rổ Phim - Xem Phim Online HD" },
+      { url: "/og/og-home.jpg", width: 1200, height: 630, alt: "Phim ngay - Xem Phim Online HD" },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rổ Phim - Xem Phim Online HD, Phim Mới Cập Nhật Nhanh",
+    title: "Phim ngay - Xem Phim Online HD, Phim Mới Cập Nhật Nhanh",
     description:
       "Xem phim online miễn phí, HD, cập nhật nhanh. Kho phim đa dạng: hành động, tình cảm, hoạt hình...",
     images: ["/og/og-home.jpg"],
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/favicon.ico", sizes: "180x180", type: "image/png" }],
   },
-  applicationName: "Rổ Phim",
+  applicationName: "Phim ngay",
   // manifest: "/manifest.webmanifest",
 };
 
@@ -85,7 +85,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebSite",
-              name: "Rổ Phim",
+              name: "Phim ngay",
               url: SITE_URL,
               potentialAction: {
                 "@type": "SearchAction",
