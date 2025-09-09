@@ -4,6 +4,9 @@ import "./globals.css";
 import HeaderLayout from "@/components/layout/header/HeaderLayout";
 import FooterLayout from "@/components/layout/footer/FooterLayout";
 import { MenuProvider } from "@/context/MenuContext";
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 
 const SITE_URL = "https://ro-phim.vn";
 
@@ -77,6 +80,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <MenuProvider>
           <HeaderLayout />
           {children}
+          <Analytics />
+          <SpeedInsights />
           <FooterLayout />
         </MenuProvider>
         <script
