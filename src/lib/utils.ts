@@ -80,28 +80,31 @@ export function fixApiPath(path: string) {
 
 
 export async function getAllMovies(): Promise<Movie[]> {
-  const res = await fetch("https://phimapi.com/movies", {
-    next: { revalidate: 3600 }, 
-  });
+  const origin =
+    process.env.API_ORIGIN ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "http://localhost:3000";
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch movies");
+  try {
+    const res = await fetch(`${origin}/api/movies?limit=5000`, {
+      next: { revalidate: 3600 }, 
+    });
+
+    if (!res.ok) {
+      throw new Error(`Fetch movies failed: ${res.status}`);
+    }
+
+    return (await res.json()) as Movie[];
+  } catch (err) {
+    console.error("getAllMovies error:", err);
+    return [];
   }
-
-  const data = await res.json();
-
-
-  return Array.isArray(data)
-    ? data
-    : Array.isArray(data.items)
-    ? data.items
-    : [];
 }
 
 
 export const sanitizeSlug = (slug: string) => {
   if (slug === "phim-moi-cap-nhat" || slug.startsWith("phim-moi-cap-nhat")) {
-    return "phim-moi-cap-nhat"; // force về slug chuẩn
+    return "phim-moi-cap-nhat"; 
   }
   return slug;
 };
