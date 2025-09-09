@@ -149,7 +149,7 @@ export default function HotSearchBannerSlider() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-transparent"></div>
       </motion.div>
 
-      <div className="relative z-10 h-full flex items-center gap-10 px-6 lg:px-16">
+      <div className="relative z-10 h-webkit flex items-center gap-10 px-6 lg:px-16">
         {/* Vertical slider (desktop left) */}
         <div className="hidden 2xl:flex w-1/4 h-full flex-col justify-center bg-black/50 p-10">
           <Swiper
