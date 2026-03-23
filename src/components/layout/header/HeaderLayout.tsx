@@ -17,7 +17,7 @@ export default function HeaderLayout() {
              bg-clip-text text-transparent"
         >
           <FilmIcon className="w-6 h-6 text-red-500" />
-          Phim Ngày
+          Dành Cho Hoa
         </Link>
 
         <div className="hidden md:flex">

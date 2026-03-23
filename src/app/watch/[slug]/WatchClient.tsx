@@ -282,7 +282,26 @@ function SmartPlayer({
   embed: string | null;
   title: string;
 }) {
-  if (m3u8) return <HlsVideo src={m3u8} title={title} />;
+  const [isFallback, setIsFallback] = useState(false);
+
+  // Reset fallback state when sources change
+  useEffect(() => {
+    setIsFallback(false);
+  }, [m3u8, embed]);
+
+  if (m3u8 && !isFallback) {
+    return (
+      <HlsVideo
+        src={m3u8}
+        title={title}
+        onError={() => {
+          console.warn("m3u8 playback failed, falling back to embed link");
+          setIsFallback(true);
+        }}
+      />
+    );
+  }
+
   if (embed) {
     const url = withAutoplay(embed);
     return (
@@ -297,6 +316,7 @@ function SmartPlayer({
       />
     );
   }
+
   return (
     <div className="h-full w-full grid place-items-center text-white/70">
       <div className="flex items-center gap-2">
@@ -306,7 +326,15 @@ function SmartPlayer({
   );
 }
 
-function HlsVideo({ src, title }: { src: string; title: string }) {
+function HlsVideo({
+  src,
+  title,
+  onError,
+}: {
+  src: string;
+  title: string;
+  onError?: () => void;
+}) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const hlsRef = useRef<Hls | null>(null);
 
@@ -314,45 +342,77 @@ function HlsVideo({ src, title }: { src: string; title: string }) {
     const video = videoRef.current;
     if (!video) return;
 
+    const onNativeError = () => {
+      console.error("Native video error");
+      onError?.();
+    };
+
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
+      video.addEventListener("error", onNativeError);
       video.play().catch(() => {});
-      return;
+      return () => {
+        video.removeEventListener("error", onNativeError);
+        video.removeAttribute("src");
+        video.load();
+      };
     }
 
     if (Hls.isSupported()) {
-      const hls = new Hls({ maxBufferLength: 60 });
+      const hls = new Hls({
+        maxBufferLength: 30,
+        enableWorker: true,
+        backBufferLength: 60,
+      });
       hlsRef.current = hls;
       hls.attachMedia(video);
       hls.on(Hls.Events.MEDIA_ATTACHED, () => hls.loadSource(src));
+
       hls.on(Hls.Events.ERROR, (_, data) => {
-        if (data?.fatal) {
+        if (data.fatal) {
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
-              hls.startLoad();
+              if (
+                data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR ||
+                data.details === Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT ||
+                data.details === Hls.ErrorDetails.LEVEL_LOAD_ERROR
+              ) {
+                console.error("HLS Network fatal error: source is likely dead", data);
+                hls.destroy();
+                onError?.();
+              } else {
+                hls.startLoad();
+              }
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
               hls.recoverMediaError();
               break;
             default:
+              console.error("HLS Unrecoverable error", data);
               hls.destroy();
+              onError?.();
+              break;
           }
         }
       });
     }
 
     return () => {
-      try {
-        hlsRef.current?.destroy();
-      } catch {}
-      if (video) video.removeAttribute("src");
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+      if (video) {
+        video.removeAttribute("src");
+        video.load();
+      }
     };
-  }, [src]);
+  }, [src, onError]);
 
   return (
     <video
       ref={videoRef}
-      className="h-full w-full"
+      className="h-full w-full outline-none"
       controls
       playsInline
       preload="auto"
